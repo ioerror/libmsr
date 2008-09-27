@@ -123,7 +123,7 @@ int main()
 	usleep (100000);
 
 	buf[0] = MSR_ESC;
-	buf[1] = MSR_READ; 
+	buf[1] = MSR_ISO_READ; 
 
 	r = write (fd, buf, 2);
 
