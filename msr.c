@@ -7,7 +7,7 @@
 #include <termios.h>
 #include <err.h>
 
-#include "msr206.h"
+#include "libmsr.h"
 
 int
 getstart (int fd)
