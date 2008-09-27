@@ -1,0 +1,16 @@
+#define MSR_ESC		0x1B
+
+#define MSR_STARTDELIM	0x73
+
+#define MSR_ENDDELIM1	0x3F
+#define MSR_ENDDELIM2	0x3F
+
+#define MSR_RESET	0x61
+
+#define MSR_COMMTEST	0x65
+
+#define MSR_READ	0x72
+#define MSR_WRITE	0x77
+
+#define MSR_READRAW	0x6D
+#define MSR_WRITERAW	0x6E
