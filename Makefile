@@ -1,6 +1,6 @@
 # This currently builds a user space program and not a useful library
 
-CFLAGS= -Wall
+CFLAGS= -Wall -g
 TARGET=msr
 OBJECTS=msr.o
 

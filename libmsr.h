@@ -12,7 +12,7 @@
 #define MSR_RESET_RESPONSE  "" // No response
 
 #define MSR_COMMTEST 0x65
-#define MSR_COMMTEST_RESPONSE MSR_ESCy[0x1b][0x79]
+#define MSR_COMMTEST_RESPONSE_SUCCESS 'y'
 
 #define MSR_ISO_READ 0x72
 #define MSR_ISO_READ_RESPONSE // [data block]MSR_ESC[status byte]
@@ -25,19 +25,19 @@
 #define MSR_WRITERAW 0x6E
 #define MSR_WRITERAW_RESPONSE MSR_ESC[StatusByte] 
 
-#define MSR_ALL_LED_OFF MSR_ESC0x81
+#define MSR_ALL_LED_OFF 0x81
 #define MSR_ALL_LED_OFF_RESPONSE "" // None
 
-#define MSR_ALL_LED_ON MSR_ESC0x82
+#define MSR_ALL_LED_ON 0x82
 #define MSR_ALL_LED_ON_RESPONSE "" // None
 
-#define MSR_GREEN_LED_ON MSR_ESC0x83
+#define MSR_GREEN_LED_ON 0x83
 #define MSR_GREEN_LED_ON_RESPONSE "" // None
 
-#define MSR_YELLOW_LED_ON MSR_ESC0x84
+#define MSR_YELLOW_LED_ON 0x84
 #define MSR_YELLOW_LED_ON_RESPONSE "" // None
 
-#define MSR_RED_LED_ON MSR_ESC0x85
+#define MSR_RED_LED_ON 0x85
 #define MSR_RED_LED_ON_RESPONSE "" // None
 
 // You must either swipe a card or reset the MSR206 unit after this test
