@@ -3,9 +3,11 @@
 #include <sys/fcntl.h>
 
 #include <unistd.h>
+#include <stdlib.h>
 #include <stdio.h>
 #include <termios.h>
 #include <err.h>
+#include <string.h>
 
 #include "libmsr.h"
 
@@ -45,10 +47,11 @@ comtest (int fd)
 
     if (fd == -1)
         err(1, "Commtest write failed");
-    //else
-    //    printf("Commtest wrote: %d\n", r);
-
-    // read the result
+/*
+    else
+        printf("Commtest wrote: %d\n", r);
+*/
+    /* read the result */
     read (fd, &b, 4);
 
     if (b[0] == MSR_ESC && b[1] == MSR_COMMTEST_RESPONSE_SUCCESS )
@@ -78,10 +81,11 @@ int get_firmware_version (int fd)
 
     if (fd == -1)
         err(1, "Firmware write failed");
-    //else
-    //    printf("Firmware version wrote: %d\n", r);
+    /* else
+        printf("Firmware version wrote: %d\n", r);
+    */
 
-    // read the result "REV?X.XX"
+    /* read the result "REV?X.XX" */
     read (fd, &b, 9);
     b[9] = '\0';
 
@@ -111,10 +115,11 @@ int get_device_model (int fd)
 
     if (fd == -1)
         err(1, "Device Model write failed");
-    //else
-    //    printf("Device Model wrote: %d\n", r);
+    /*else
+        printf("Device Model wrote: %d\n", r);
+    */
 
-    // read the result as the value of X in "MSR206-X"
+    /* read the result as the value of X in "MSR206-X" */
     read (fd, &b, 3);
     b[4] = '\0';
 
@@ -127,11 +132,11 @@ int get_device_model (int fd)
     return 1;
 }
 
-int flash_led(int fd, char led)
+int flash_led(int fd, uint8_t led)
 {
 
     int r;
-    char buf[2];
+    uint8_t buf[2];
 
     buf[0] = MSR_ESC;
     buf[1] = led;
@@ -143,7 +148,7 @@ int flash_led(int fd, char led)
     if (fd == -1)
         err(1, "LED failure");
 
-    // No response, look at the lights Dr. Love
+    /* No response, look at the lights Dr. Love */
     return 0;
 
 }
@@ -167,7 +172,6 @@ int do_leet_led_dance(fd)
 
 int setup_serial()
 {
-    // 
     return 0;
 }
 
@@ -221,10 +225,10 @@ int main()
 	char    buf[256];
 	int     i, r;
 
-    // Default device selection per platform
+    /* Default device selection per platform */
     #ifdef linux 
         const char *device = "/dev/ttyS0";
-    #elif BSD
+    #else
         const char *device = "/dev/cuaU0";
     #endif
 
@@ -265,7 +269,7 @@ int main()
 	tcsetattr(fd, TCSANOW, &options);
 	printf("set options...\n");
 
-    // Ensure the reader is reset
+    /* Ensure the reader is reset */
 	buf[0] = MSR_ESC;
 	buf[1] = MSR_RESET;
 
@@ -273,22 +277,22 @@ int main()
 
 	usleep (100000);
 
-    // Test the reader connection
+    /* Test the reader connection */
     comtest(fd);
 
-    // Get the device model
+    /* Get the device model */
     get_device_model(fd);
 
-    // Get the firmware version information
+    /* Get the firmware version information */
     get_firmware_version(fd);
 
-    // Flash the LEDs to make things more 31337
+    /* Flash the LEDs to make things more 31337 */
     printf("Preparing reader for reading...\n");
     do_leet_led_dance(fd);
 
     printf("Ready to read\n");
 
-    // Now we'll tell the reader we'd like to read the ISO formatted data
+    /* Now we'll tell the reader we'd like to read the ISO formatted data */
 	buf[0] = MSR_ESC;
 	buf[1] = MSR_ISO_READ; 
 
