@@ -19,7 +19,8 @@ $(UTIL): $(UTILOBJS)
 	$(CC) -o $(UTIL) $(UTILOBJS) -L. -lmsr
 
 install:
-	install -m655 msr $(DESTDIR)/usr/bin/msr
+	install -m655 $(UTIL) $(DESTDIR)/usr/bin/$(UTIL)
+	install -m655 $(LIB) $(DESTDIR)/usr/$(LIB)
 
 clean:
 	rm -rf *.o *~ $(LIB) $(UTIL)
