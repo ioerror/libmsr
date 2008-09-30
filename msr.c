@@ -229,7 +229,7 @@ int main()
 	int     i, r;
 
     /* Default device selection per platform */
-    #ifdef linux 
+    #ifdef __linux__ 
         const char *device = "/dev/ttyS0";
     #else
         const char *device = "/dev/cuaU0";
