@@ -185,13 +185,6 @@ do_leet_led_dance (fd)
     return 0;
 }
 
-
-int
-isoread ()
-{
-    return 0;
-}
-
 int
 gettrack (int fd, int t)
 {
@@ -250,7 +243,8 @@ msr_reset (fd)
 int
 msr_iso_read(fd)
 {
-    char buf[256];
+
+    char buf[2];
     int i, r; 
 
     bzero (buf, sizeof(buf));
@@ -266,8 +260,6 @@ msr_iso_read(fd)
         err(1, "Command write failed");
     else
         printf("wrote: %d\n", r);
-
-    i = 0;
 
     if (getstart (fd) == -1)
         err(1, "get start delimiter failed");
@@ -315,9 +307,8 @@ int main()
 
     /* Flash the LEDs to make things more 31337 */
     printf("Preparing reader for reading...\n");
-    do_leet_led_dance (fd);
+    /*do_leet_led_dance (fd);*/
 
-    msr_reset (fd);
     printf("Ready to read an ISO formatted card. Please slide a card.\n");
 
     /* Now we'll tell the reader we'd like to read the ISO formatted data */
