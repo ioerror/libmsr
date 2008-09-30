@@ -222,6 +222,39 @@ gettrack (int fd, int t)
 	return (-1);
 }
 
+int 
+msr_sensor_test (fd)
+{
+    int r;
+    char b[4];
+    unsigned char buf[3];
+
+    bzero (buf, sizeof(buf));
+    buf[0] = MSR_ESC;
+    buf[1] = MSR_SENSOR_TEST;
+    
+    r = write (fd, buf, 2);
+
+    printf("Attempting to read a response for the next five seconds.\n");
+    printf("Please slide a card and wait...\n");
+    sleep (5);
+
+    /* read the result "<esc>0(0x1b0x30)" if OK */
+    read (fd, &b, 2);
+    b[2] = '\0';
+
+    printf("Sensor test results: %s\n", b);
+    if ( b[0] == MSR_ESC && b[1] == MSR_SENSOR_TEST_RESPONSE_SUCCESS )
+    {
+        printf("Sensor test successfull\n");
+        return 0;
+    }
+
+    printf("It appears that the sensor did not sense a magnetic card.\n");
+    return 1;
+
+}
+
 int
 msr_reset (fd)
 {
@@ -310,6 +343,8 @@ int main(int argc, char * argv[])
     /* Get the firmware version information */
     get_firmware_version (fd);
 
+    /* Test the mag sensor */
+    msr_sensor_test (fd);
     /* Flash the LEDs to make things more 31337 */
     printf("Preparing reader for reading...\n");
     /*do_leet_led_dance (fd);*/

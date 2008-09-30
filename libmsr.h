@@ -41,8 +41,8 @@
 #define MSR_RED_LED_ON_RESPONSE "" /* None */
 
 /* You must either swipe a card or reset the MSR206 unit after this test */
-#define MSR_SENSOR_TEST MSR_ESC0x86
-#define MSR_SENSOR_TEST_RESPONSE MSR_ESC[0x0][0x1b][0x30]
+#define MSR_SENSOR_TEST 0x86
+#define MSR_SENSOR_TEST_RESPONSE_SUCCESS 0x30
 
 /* This causes the MSR206 to perform a self test of its RAM */
 #define MSR_RAM_TEST MSR_ESC0x87
