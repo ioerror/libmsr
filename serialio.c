@@ -40,6 +40,28 @@ serial_readchar (int fd, uint8_t * c)
 	return (r);
 }
 
+/*
+ * Read a series of characters from the serial port. This
+ * routine will block until the desired number of characters
+ * is read.
+ */
+
+int
+serial_read (int fd, void * buf, size_t len)
+{
+	size_t i;
+	uint8_t b, *p;
+
+	p = buf;
+
+	for (i = 0; i < len; i++) {
+		serial_readchar (fd, &b);
+		p[i] = b;
+	}
+
+	return (0);
+}
+
 int
 serial_write (int fd, void * buf, size_t len)
 {
