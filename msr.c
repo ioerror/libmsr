@@ -13,6 +13,7 @@
 #include <string.h>
 
 #include "libmsr.h"
+#include "serialio.h"
 
 /* Thanks Club Mate and h1kari! Toorcon 10 */
 
@@ -40,6 +41,8 @@ comtest (int fd)
     int r;
     char b[256];
     char buf[256];
+
+    bzero (buf, sizeof(buf));
 
     buf[0] = MSR_ESC;
     buf[1] = MSR_COMMTEST;
@@ -69,11 +72,14 @@ comtest (int fd)
 
 }
 
-int get_firmware_version (int fd)
+int 
+get_firmware_version (int fd)
 {
     int r;
     char b[256];
     char buf[256];
+
+    bzero (buf, sizeof(buf));
 
     buf[0] = MSR_ESC;
     buf[1] = 0x76;
@@ -109,6 +115,8 @@ int get_device_model (int fd)
     char b[4];
     char buf[2];
 
+    bzero (buf, sizeof(buf));
+
     buf[0] = MSR_ESC;
     buf[1] = 0x74;
 
@@ -135,11 +143,14 @@ int get_device_model (int fd)
     return 1;
 }
 
-int flash_led(int fd, uint8_t led)
+int
+flash_led (int fd, uint8_t led)
 {
 
     int r;
     uint8_t buf[2];
+
+    bzero (buf, sizeof(buf));
 
     buf[0] = MSR_ESC;
     buf[1] = led;
@@ -156,7 +167,8 @@ int flash_led(int fd, uint8_t led)
 
 }
 
-int do_leet_led_dance(fd)
+int 
+do_leet_led_dance (fd)
 {
     int z = 0;
     while(z < 10){
@@ -173,13 +185,9 @@ int do_leet_led_dance(fd)
     return 0;
 }
 
-int setup_serial()
-{
-    return 0;
-}
 
-
-int isoread()
+int
+isoread ()
 {
     return 0;
 }
@@ -221,12 +229,61 @@ gettrack (int fd, int t)
 	return (-1);
 }
 
+int
+msr_reset (fd)
+{
+    int r;
+    char    buf[2];
+
+    bzero (buf, sizeof(buf));
+
+    buf[0] = MSR_ESC;
+    buf[1] = MSR_RESET;
+
+    r = write (fd, buf, 2);
+
+    usleep (100000);
+
+    return 0;
+}
+
+int
+msr_iso_read(fd)
+{
+    char buf[256];
+    int i, r; 
+
+    bzero (buf, sizeof(buf));
+
+    buf[0] = MSR_ESC;
+    buf[1] = MSR_ISO_READ;
+
+    r = write (fd, buf, 2);
+
+    usleep (100000);
+
+    if (fd == -1)
+        err(1, "Command write failed");
+    else
+        printf("wrote: %d\n", r);
+
+    i = 0;
+
+    if (getstart (fd) == -1)
+        err(1, "get start delimiter failed");
+
+    gettrack (fd, 1);
+    gettrack (fd, 2);
+    gettrack (fd, 3);
+
+    return 0;
+
+}
+
 int main()
 {
-	int fd;
-    struct termios  options;
-	char    buf[256];
-	int     i, r;
+	int *fd = -1;
+    int serial;
 
     /* Default device selection per platform */
     #ifdef __linux__ 
@@ -235,91 +292,38 @@ int main()
         const char *device = "/dev/cuaU0";
     #endif
 
-	bzero (buf, sizeof(buf));
+	/* bzero (buf, sizeof(buf)); */
 
-    printf("Attempting to open %s\n", device);
+    serial = serial_open (device, &fd);
 
-	fd = open(device, O_RDWR | O_NOCTTY /*| O_NDELAY*/);
-
-	if (fd == -1)
-		err(1, "Open failed. Unable to open %s", device);
-
-	printf("Device open successful...\n"); 
-    printf("FD: %d\n", fd);
-
-	tcgetattr(fd, &options);
-
-	printf("got options...\n");
-
-	/* Set baud rate */
-
-	cfsetispeed(&options, B9600);
-	cfsetospeed(&options, B9600);
-
-	options.c_cflag |= (CLOCAL | CREAD);
-	options.c_cflag &= ~PARENB;
-	options.c_cflag &= ~CSTOPB;
-	options.c_cflag &= ~CSIZE;
-
-	options.c_cflag |= CS8;
-
-	options.c_lflag &= ~ICANON;
-	options.c_lflag &= ~ICRNL;
-	options.c_lflag &= ~ECHO;
-	options.c_iflag |= IXOFF;
-
-	options.c_oflag &= ~OPOST;
-	tcsetattr(fd, TCSANOW, &options);
-	printf("set options...\n");
-
-    /* Ensure the reader is reset */
-	buf[0] = MSR_ESC;
-	buf[1] = MSR_RESET;
-
-	r = write (fd, buf, 2);
-
-	usleep (100000);
+    if (serial == -1) {
+        printf("Serial open failed.\n");
+        exit(1);
+    }
+    
+    /* Prepare the reader with a reset */
+    msr_reset (fd);
 
     /* Test the reader connection */
-    comtest(fd);
+    comtest (fd);
 
     /* Get the device model */
-    get_device_model(fd);
+    get_device_model (fd);
 
     /* Get the firmware version information */
-    get_firmware_version(fd);
+    get_firmware_version (fd);
 
     /* Flash the LEDs to make things more 31337 */
     printf("Preparing reader for reading...\n");
-    do_leet_led_dance(fd);
+    do_leet_led_dance (fd);
 
-    printf("Ready to read\n");
+    msr_reset (fd);
+    printf("Ready to read an ISO formatted card. Please slide a card.\n");
 
     /* Now we'll tell the reader we'd like to read the ISO formatted data */
-	buf[0] = MSR_ESC;
-	buf[1] = MSR_ISO_READ; 
+    msr_iso_read (fd);
 
-	r = write (fd, buf, 2);
-
-	usleep (100000);
-
-	if (fd == -1)
-		err(1, "write failed");
-	else
-		printf("wrote: %d\n", r);
-
-	i = 0;
-
-	if (getstart (fd) == -1)
-		err(1, "get start delimiter failed");
-
-	gettrack (fd, 1);
-	gettrack (fd, 2);
-	gettrack (fd, 3);
-
-	close (fd);
-
-	printf("buf: %s\n", buf);
-
+    /* We're finished */
+	serial_close (fd);
 	exit(0);
 }
