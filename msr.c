@@ -2,6 +2,7 @@
 #include <sys/ioctl.h>
 #include <sys/fcntl.h>
 
+#define __USE_BSD
 #include <unistd.h>
 #include <stdlib.h>
 #include <stdint.h>
