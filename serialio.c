@@ -1,10 +1,10 @@
 #include <sys/types.h>
 #include <sys/fcntl.h>
-#include <sys/tty.h>
 
 #include <stdlib.h>
 #include <unistd.h>
 #include <stdio.h>
+#include <stdint.h>
 #include <termios.h>
 #include <err.h>
 
