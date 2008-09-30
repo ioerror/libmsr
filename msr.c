@@ -245,7 +245,7 @@ msr_iso_read(fd)
 {
 
     char buf[2];
-    int i, r; 
+    int r; 
 
     bzero (buf, sizeof(buf));
 
