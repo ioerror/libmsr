@@ -20,11 +20,12 @@
 int
 getstart (int fd)
 {
-	char b;
+	uint8_t b;
 	int i, r;
 
 	for (i = 0; i < 3; i++) {
-		r = read (fd, &b, 1);
+		/* r = read (fd, &b, 1); */
+        r = serial_readchar(fd, &b);
 		if (b == MSR_STARTDELIM)
 			break;
 	}
