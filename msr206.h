@@ -25,6 +25,11 @@
 #define MSR_STS_RW_CMDBAD_ERR	0x34	/* Invalid command */
 #define MSR_STS_RW_SWIPEBAD_ERR	0x39	/* Invalud card swipe in write mode */
 
+/* Read/write start and end delimitesr. */
+
+#define MSR_RW_START		0x73	/* 's' */
+#define MSR_RW_END		0x3F	/* '?' */
+
 /*
  * Serial port communications test
  * If serial communications are working properly, the device
