@@ -1,4 +1,6 @@
 
+#ifdef _MSR206_H_
+
 /* ESC is frequently used as a start delimiter character */
 
 #define MSR_ESC			0x1B	/* Escape character */
@@ -154,7 +156,7 @@ typedef struct msr_bpc {
 #defien MSR_STS_CO_ERR		MSR_STS_ERR
 
 /*
- * Get coerivity. Returns 'H' for high coercivity, 'L' for low.
+ * Get coercivity. Returns 'H' for high coercivity, 'L' for low.
  */
 
 #define MSR_CMD_GETGO		0x64	/* Read coercivity setting */
@@ -169,3 +171,5 @@ typedef struct msr_bpc {
 #define MSR_CMD_LED_GRN_ON	0x83	/* Green LED on */
 #define MSR_CMD_LED_YLW_ON	0x84	/* Yellow LED on */
 #define MSR_CMD_LED_RED_ON	0x85	/* Red LED on */
+
+#endif /* _MSR206_H_ */
