@@ -272,24 +272,29 @@ msr_iso_read(fd)
 
 }
 
-int main()
+int main(int argc, char * argv[])
 {
-	int *fd = -1;
-    int serial;
+	int fd = -1;
+	int serial;
 
     /* Default device selection per platform */
     #ifdef __linux__ 
-        const char *device = "/dev/ttyS0";
+        char *device = "/dev/ttyS0";
     #else
-        const char *device = "/dev/cuaU0";
+        char *device = "/dev/cuaU0";
     #endif
+
+	if (argv[1] != NULL)
+		device = argv[1];
+	else
+		printf ("no device specified, defaulting to %s\n", device);
 
 	/* bzero (buf, sizeof(buf)); */
 
     serial = serial_open (device, &fd);
 
     if (serial == -1) {
-        printf("Serial open failed.\n");
+        err(1, "Serial open of %s failed", device);
         exit(1);
     }
     
