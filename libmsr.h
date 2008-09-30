@@ -45,9 +45,9 @@
 #define MSR_SENSOR_TEST_RESPONSE_SUCCESS 0x30
 
 /* This causes the MSR206 to perform a self test of its RAM */
-#define MSR_RAM_TEST MSR_ESC0x87
-#define MSR_RAM_TEST_RESPONSE_SUCCESS MSR_ESC[0x0][0x1b][0x30]
-#define MSR_RAM_TEST_RESPONSE_FAILURE MSR_ESC[0x0][0x1b][0x41]
+#define MSR_RAM_TEST 0x87
+#define MSR_RAM_TEST_RESPONSE_SUCCESS 0x30
+#define MSR_RAM_TEST_RESPONSE_FAILURE 0x41
 
 /* This command will return a string with the current hardware device model */
 #define MSR_GET_DEVICE_MODEL MSR_ESC0x74

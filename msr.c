@@ -256,6 +256,38 @@ msr_sensor_test (fd)
 }
 
 int
+msr_ram_test (fd)
+{
+    int r;
+    char b[4];
+    unsigned char buf[3];
+
+    bzero (buf, sizeof(buf));
+    buf[0] = MSR_ESC;
+    buf[1] = MSR_RAM_TEST;
+
+    printf("Running ram test...\n");
+    r = write (fd, buf, 2);
+
+    usleep (1000000);
+
+    /* read the result "<esc>0" if OK, "<esc>0x41" if full of fail */
+    read (fd, &b, 2);
+    b[2] = '\0';
+
+    printf("RAM test results: %s\n", b);
+    if ( b[0] == MSR_ESC && b[1] == MSR_RAM_TEST_RESPONSE_SUCCESS )
+    {
+        printf("RAM test successfull.\n");
+        return 0;
+    } 
+    
+    printf("It appears that the RAM test failed or responded in an unknown way");
+    return 1;
+
+}
+
+int
 msr_reset (fd)
 {
     int r;
@@ -345,6 +377,10 @@ int main(int argc, char * argv[])
 
     /* Test the mag sensor */
     msr_sensor_test (fd);
+
+    /* Ram test */
+    msr_ram_test (fd);
+
     /* Flash the LEDs to make things more 31337 */
     printf("Preparing reader for reading...\n");
     /*do_leet_led_dance (fd);*/
