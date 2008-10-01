@@ -289,6 +289,71 @@ msr_ram_test (fd)
 }
 
 int
+msr_set_hi_co (fd)
+{
+    int r;
+    char b[4];
+    unsigned char buf[3];
+
+    bzero (buf, sizeof(buf));
+    buf[0] = MSR_ESC;
+    buf[1] = MSR_SET_HI_CO;
+
+    printf("Putting the writer to Hi-Co mode...\n");
+    r = write (fd, buf, 2);
+
+    usleep (1000000);
+
+    /* read the result "<esc>0" if OK, unknown or no response if fail */
+    read (fd, &b, 2);
+    b[2] = '\0';
+
+    printf("Hi-Co test results: %s\n", b);
+    if ( b[0] == MSR_ESC && b[1] == MSR_SET_HI_CO_RESPONSE_SUCCESS )
+    {
+        printf("We were able to put the writer into Hi-Co mode.\n");
+        return 0;
+    } 
+    
+    printf("It appears that the reader did not switch to Hi-Co mode.");
+    return 1;
+
+}
+
+int
+msr_set_low_co (fd)
+{
+    int r;
+    char b[4];
+    unsigned char buf[3];
+
+    bzero (buf, sizeof(buf));
+    buf[0] = MSR_ESC;
+    buf[1] = MSR_SET_LOW_CO;
+
+    printf("Putting the writer to Low-Co mode...\n");
+    r = write (fd, buf, 2);
+
+    usleep (1000000);
+
+    /* read the result "<esc>0" if OK, unknown or no response if fail */
+    read (fd, &b, 2);
+    b[2] = '\0';
+
+    printf("Hi-Co test results: %s\n", b);
+    if ( b[0] == MSR_ESC && b[1] == MSR_SET_LOW_CO_RESPONSE_SUCCESS )
+    {
+        printf("We were able to put the writer into Low-Co mode.\n");
+        return 0;
+    } 
+    
+    printf("It appears that the reader did not switch to Low-Co mode.");
+    return 1;
+
+}
+
+
+int
 msr_reset (fd)
 {
     int r;
