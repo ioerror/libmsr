@@ -14,8 +14,20 @@
 
 #include "libmsr.h"
 #include "serialio.h"
+#include "msr206.h"
 
 /* Thanks Club Mate and h1kari! Toorcon 10 */
+
+int
+msr_cmd (int fd, uint8_t c)
+{
+	msr_cmd_t	cmd;
+	
+	cmd.msr_esc = MSR_ESC;
+	cmd.msr_cmd = c;
+
+	return (serial_write (fd, &cmd, sizeof(cmd)));
+}
 
 int
 getstart (int fd)
@@ -24,9 +36,8 @@ getstart (int fd)
 	int i, r;
 
 	for (i = 0; i < 3; i++) {
-		/* r = read (fd, &b, 1); */
-        r = serial_readchar(fd, &b);
-		if (b == MSR_STARTDELIM)
+			r = serial_readchar(fd, &b);
+		if (b == MSR_RW_START)
 			break;
 	}
 
@@ -37,426 +48,363 @@ getstart (int fd)
 }
 
 int
+getend (int fd)
+{
+	msr_end_t m;
+
+	serial_read (fd, &m, sizeof(m));
+
+	if (m.msr_sts != MSR_STS_OK) {
+		printf ("read returned error status: 0x%x\n", m.msr_sts);
+		return (-1);
+	}
+
+	return (0);
+}
+
+int
 comtest (int fd)
 {
-    int r;
-    char b[256];
-    char buf[256];
+	int r;
+	uint8_t buf[2];
 
-    bzero (buf, sizeof(buf));
+	r = msr_cmd (fd, MSR_CMD_DIAG_COMM);
 
-    buf[0] = MSR_ESC;
-    buf[1] = MSR_COMMTEST;
+	if (r == -1)
+   		err(1, "Commtest write failed");
 
-    r = write (fd, buf, 2); 
+	/*
+	 * Read the result. Note: we're supposed to get back
+	 * two characters: an escape and a 'y' character. But
+	 * with my serial USB adapter, the escape sometimes
+	 * gets lost. As a workaround, we scan only for the 'y'
+	 * and discard the escape.
+	 */
 
-    usleep (100000);
+	while (1) {
+		serial_readchar (fd, &buf[0]);
+		if (buf[0] == MSR_STS_COMM_OK)
+			break;
+	}
 
-    if (fd == -1)
-        err(1, "Commtest write failed");
-/*
-    else
-        printf("Commtest wrote: %d\n", r);
-*/
-    /* read the result */
-    read (fd, &b, 4);
-
-    if (b[0] == MSR_ESC && b[1] == MSR_COMMTEST_RESPONSE_SUCCESS )
-    {
-        printf("Communications test successful\n");
-        return 0;
-    } else {
-        printf("Communcations test failure\n");
-    }
-    
-    return 1;
-
+	if (buf[0] != MSR_STS_COMM_OK) {
+		printf("Communications test failure\n");
+		return (-1);
+	} else
+		printf("Communications test passed.\n");
+	
+	return (0);
 }
 
 int 
 get_firmware_version (int fd)
 {
-    int r;
-    char b[256];
-    char buf[256];
+	uint8_t		buf[64];
 
-    bzero (buf, sizeof(buf));
+	bzero (buf, sizeof(buf));
 
-    buf[0] = MSR_ESC;
-    buf[1] = 0x76;
+	msr_cmd (fd, MSR_CMD_FWREV);
 
-    r = write (fd, buf, 2);
+	serial_readchar (fd, &buf[0]);
 
-    usleep (100000);
+	/* read the result "REV?X.XX" */
 
-    if (fd == -1)
-        err(1, "Firmware write failed");
-    /* else
-        printf("Firmware version wrote: %d\n", r);
-    */
+	serial_read (fd, buf, 8);
+	buf[8] = '\0';
 
-    /* read the result "REV?X.XX" */
-    read (fd, &b, 9);
-    b[9] = '\0';
+	printf ("Firmware Version: %s\n", buf);
 
-    printf("Firmware version results: %s\n", b);
-    if (b[0] == MSR_ESC && b[1] == 'y')
-    {
-        printf("MSR_COMMTEST SUCCESSFUL\n");
-        return 0;
-    }
-
-    return 1;
-
+	return (0);
 }
 
-int get_device_model (int fd)
+int
+get_device_model (int fd)
 {
-    int r;
-    char b[4];
-    char buf[2];
+	msr_model_t	m;
 
-    bzero (buf, sizeof(buf));
+	msr_cmd (fd, MSR_CMD_MODEL);
 
-    buf[0] = MSR_ESC;
-    buf[1] = 0x74;
+	/* read the result as the value of X in "MSR206-X" */
 
-    r = write (fd, buf, 2);
+	serial_read (fd, &m, sizeof(m));
 
-    usleep (100000);
+	if (m.msr_s != MSR_STS_MODEL_OK)
+		return (1);
 
-    if (fd == -1)
-        err(1, "Device Model write failed");
-    /*else
-        printf("Device Model wrote: %d\n", r);
-    */
-
-    /* read the result as the value of X in "MSR206-X" */
-    read (fd, &b, 3);
-    b[4] = '\0';
-
-    if (b[1] == '1' || '2' || '3' || '5')
-    {
-        printf("Device Model detected: MSR-206-%c\n", b[1]);
-        return 0;
-    }
-    
-    return 1;
+	printf("Device Model: MSR-206-%c\n", m.msr_model);
+	
+	return (0);
 }
 
 int
 flash_led (int fd, uint8_t led)
 {
 
-    int r;
-    uint8_t buf[2];
+	int r;
 
-    bzero (buf, sizeof(buf));
+	r = msr_cmd (fd, led);
 
-    buf[0] = MSR_ESC;
-    buf[1] = led;
+	if (r == -1)
+		err(1, "LED failure");
 
-    r = write (fd, buf, 2);
+	usleep (100000);
 
-    usleep (100000);
-
-    if (fd == -1)
-        err(1, "LED failure");
-
-    /* No response, look at the lights Dr. Love */
-    return 0;
-
+	/* No response, look at the lights Dr. Love */
+	return (0);
 }
 
 int 
-do_leet_led_dance (fd)
+do_leet_led_dance (int fd)
 {
-    int z = 0;
-    while(z < 10){
+	int z = 0;
+	while (z < 3) {
+	flash_led(fd, MSR_CMD_LED_OFF);
+	flash_led(fd, MSR_CMD_LED_GRN_ON);
+	flash_led(fd, MSR_CMD_LED_YLW_ON);
+	flash_led(fd, MSR_CMD_LED_RED_ON);
+	usleep (100000);
+	z++;
+	}
 
-        flash_led(fd, MSR_ALL_LED_ON);
-        flash_led(fd, MSR_GREEN_LED_ON);
-        flash_led(fd, MSR_YELLOW_LED_ON);
-        flash_led(fd, MSR_RED_LED_ON);
-        flash_led(fd, MSR_ALL_LED_OFF);
-        usleep (100000);
-        z++;
-    }
-
-    return 0;
+	return(0);
 }
 
 int
-gettrack (int fd, int t)
+gettrack (int fd, int t, uint8_t * buf, uint8_t * len)
 {
-	char b;
+	uint8_t b;
+	int i = 0;
+	int l = 0;
 
 	/* Start delimiter should be ESC <track number> */
 
-	read (fd, &b, 1);
+	serial_readchar (fd, &b);
 	if (b != MSR_ESC) {
 		printf("NOT AN ESCAPE (%x)...\n", b);
 		return (-1);
-	} else {
-        printf("ESCAPE SEQUENCE FOUND\n");
-    }
-	read (fd, &b, 1);
-	if (b != t)
-		{
+	}
+
+	serial_readchar (fd, &b);
+	if (b != t) {
 		printf("NOT A TRACK (%x)...\n", b);
 		return (-1);
-		}
+	}
 
-	printf("GETTING TRACK %d WITH DATA CAST AS UNSIGNED CHAR\n", t);
 	while (1) {
-		read (fd, &b, 1);
-		if (b == MSR_ENDDELIM1)
+		serial_readchar (fd, &b);
+		if (b == MSR_ESC)
 			break;
 		printf("%c", b);
+		/* Avoid overflowing the buffer */
+		if (i < *len) {
+			l++;
+			buf[i] = b;
+		}
+		i++;
+		if (b == MSR_RW_END)
+			break;
 	}
 
-	/* Should be another escape here */
-	if (b == MSR_ENDDELIM1) {
-		printf("\nTRACK %d READ FINISHED\n", t);
+
+	if (b == MSR_RW_END) {
+		*len = l;
+		printf("\nTRACK %d READ FINISHED, GOT %d BYTES\n", t, l);
 		return (0);
+	} else {
+		*len = 0;
+		serial_readchar (fd, &b);
+		if (b == MSR_RW_EMPTY)
+			printf("TRACK %d READ IS EMPTY\n", t);
+		if (b == MSR_RW_BAD)
+			printf("TRACK %d READ ERROR\n", t);
 	}
+
 	return (-1);
 }
 
 int 
-msr_sensor_test (fd)
+msr_sensor_test (int fd)
 {
-    int r;
-    char b[4];
-    unsigned char buf[3];
+	uint8_t b[4];
 
-    bzero (buf, sizeof(buf));
-    buf[0] = MSR_ESC;
-    buf[1] = MSR_SENSOR_TEST;
-    
-    r = write (fd, buf, 2);
+	msr_cmd (fd, MSR_CMD_DIAG_SENSOR);
+	
+	printf("Attempting sensor test -- please slide a card...\n");
 
-    printf("Attempting to read a response for the next five seconds.\n");
-    printf("Please slide a card and wait...\n");
-    sleep (5);
+	serial_read (fd, &b, 2);
 
-    /* read the result "<esc>0(0x1b0x30)" if OK */
-    read (fd, &b, 2);
-    b[2] = '\0';
+	if (b[0] == MSR_ESC && b[1] == MSR_STS_SENSOR_OK) {
+		printf("Sensor test successfull\n");
+		return 0;
+	}
 
-    printf("Sensor test results: %s\n", b);
-    if ( b[0] == MSR_ESC && b[1] == MSR_SENSOR_TEST_RESPONSE_SUCCESS )
-    {
-        printf("Sensor test successfull\n");
-        return 0;
-    }
-
-    printf("It appears that the sensor did not sense a magnetic card.\n");
-    return 1;
-
+	printf("It appears that the sensor did not sense a magnetic card.\n");
+	return (-1);
 }
 
 int
-msr_ram_test (fd)
+msr_ram_test (int fd)
 {
-    int r;
-    char b[4];
-    unsigned char buf[3];
+	uint8_t b[2];
 
-    bzero (buf, sizeof(buf));
-    buf[0] = MSR_ESC;
-    buf[1] = MSR_RAM_TEST;
+	printf("Running ram test...\n");
+	msr_cmd (fd, MSR_CMD_DIAG_RAM);
 
-    printf("Running ram test...\n");
-    r = write (fd, buf, 2);
+	usleep (1000000);
 
-    usleep (1000000);
+	serial_read(fd, b, sizeof(b));
 
-    /* read the result "<esc>0" if OK, "<esc>0x41" if full of fail */
-    read (fd, &b, 2);
-    b[2] = '\0';
-
-    printf("RAM test results: %s\n", b);
-    if ( b[0] == MSR_ESC && b[1] == MSR_RAM_TEST_RESPONSE_SUCCESS )
-    {
-        printf("RAM test successfull.\n");
-        return 0;
-    } 
-    
-    printf("It appears that the RAM test failed or responded in an unknown way");
-    return 1;
-
+	if (b[0] == MSR_ESC && b[1] == MSR_STS_RAM_OK) {
+		printf("RAM test successfull.\n");
+ 		return (0);
+	} 
+	
+	printf("It appears that the RAM test failed\n");
+	return (-1);
 }
 
 int
-msr_set_hi_co (fd)
+msr_set_hi_co (int fd)
 {
-    int r;
-    char b[4];
-    unsigned char buf[3];
+	char b[2];
 
-    bzero (buf, sizeof(buf));
-    buf[0] = MSR_ESC;
-    buf[1] = MSR_SET_HI_CO;
+	printf("Putting the writer to Hi-Co mode...\n");
 
-    printf("Putting the writer to Hi-Co mode...\n");
-    r = write (fd, buf, 2);
-
-    usleep (1000000);
-
-    /* read the result "<esc>0" if OK, unknown or no response if fail */
-    read (fd, &b, 2);
-    b[2] = '\0';
-
-    printf("Hi-Co test results: %s\n", b);
-    if ( b[0] == MSR_ESC && b[1] == MSR_SET_HI_CO_RESPONSE_SUCCESS )
-    {
-        printf("We were able to put the writer into Hi-Co mode.\n");
-        return 0;
-    } 
-    
-    printf("It appears that the reader did not switch to Hi-Co mode.");
-    return 1;
-
+	msr_cmd (fd, MSR_CMD_SETCO_HI);
+ 
+	/* read the result "<esc>0" if OK, unknown or no response if fail */
+	serial_read (fd, &b, 2);
+ 
+	if (b[0] == MSR_ESC && b[1] == MSR_STS_OK) {
+		printf("We were able to put the writer into Hi-Co mode.\n");
+		return (0);
+	}
+   
+	printf("It appears that the reader did not switch to Hi-Co mode.");
+	return (1);
 }
 
 int
-msr_set_low_co (fd)
+msr_set_lo_co (int fd)
 {
-    int r;
-    char b[4];
-    unsigned char buf[3];
+	char b[2];
 
-    bzero (buf, sizeof(buf));
-    buf[0] = MSR_ESC;
-    buf[1] = MSR_SET_LOW_CO;
+	printf("Putting the writer to Lo-Co mode...\n");
 
-    printf("Putting the writer to Low-Co mode...\n");
-    r = write (fd, buf, 2);
-
-    usleep (1000000);
-
-    /* read the result "<esc>0" if OK, unknown or no response if fail */
-    read (fd, &b, 2);
-    b[2] = '\0';
-
-    printf("Hi-Co test results: %s\n", b);
-    if ( b[0] == MSR_ESC && b[1] == MSR_SET_LOW_CO_RESPONSE_SUCCESS )
-    {
-        printf("We were able to put the writer into Low-Co mode.\n");
-        return 0;
-    } 
-    
-    printf("It appears that the reader did not switch to Low-Co mode.");
-    return 1;
-
-}
-
-
-int
-msr_reset (fd)
-{
-    int r;
-    char    buf[2];
-
-    bzero (buf, sizeof(buf));
-
-    buf[0] = MSR_ESC;
-    buf[1] = MSR_RESET;
-
-    r = write (fd, buf, 2);
-
-    usleep (100000);
-
-    return 0;
+	msr_cmd (fd, MSR_CMD_SETCO_LO);
+ 
+	/* read the result "<esc>0" if OK, unknown or no response if fail */
+	serial_read (fd, &b, 2);
+ 
+	if (b[0] == MSR_ESC && b[1] == MSR_STS_OK) {
+		printf("We were able to put the writer into Hi-Co mode.\n");
+		return (0);
+	}
+   
+	printf("It appears that the reader did not switch to Hi-Co mode.");
+	return (1);
 }
 
 int
-msr_iso_read(fd)
+msr_reset (int fd)
 {
+	msr_cmd (fd, MSR_CMD_RESET);
 
-    char buf[2];
-    int r; 
+	usleep (100000);
 
-    bzero (buf, sizeof(buf));
+	return (0);
+}
 
-    buf[0] = MSR_ESC;
-    buf[1] = MSR_ISO_READ;
+int
+msr_iso_read(int fd, msr_tracks_t * tracks)
+{
+	int r; 
 
-    r = write (fd, buf, 2);
+	r = msr_cmd (fd, MSR_CMD_READ);
 
-    usleep (100000);
+	if (r == -1)
+		err(1, "Command write failed");
 
-    if (fd == -1)
-        err(1, "Command write failed");
-    else
-        printf("wrote: %d\n", r);
+	if (getstart (fd) == -1)
+		err(1, "get start delimiter failed");
 
-    if (getstart (fd) == -1)
-        err(1, "get start delimiter failed");
+	gettrack (fd, 1, tracks->msr_tk1_data, &tracks->msr_tk1_len);
+	gettrack (fd, 2, tracks->msr_tk2_data, &tracks->msr_tk2_len);
+	gettrack (fd, 3, tracks->msr_tk3_data, &tracks->msr_tk3_len);
 
-    gettrack (fd, 1);
-    gettrack (fd, 2);
-    gettrack (fd, 3);
+	if (getend (fd) == -1)
+		err(1, "read failed");
 
-    return 0;
-
+	return (0);
 }
 
 int main(int argc, char * argv[])
 {
 	int fd = -1;
 	int serial;
+	msr_tracks_t tracks;
 
-    /* Default device selection per platform */
-    #ifdef __linux__ 
-        char *device = "/dev/ttyS0";
-    #else
-        char *device = "/dev/cuaU0";
-    #endif
+	/* Default device selection per platform */
+#ifdef __linux__ 
+	char *device = "/dev/ttyS0";
+#else
+	char *device = "/dev/cuaU0";
+#endif
 
 	if (argv[1] != NULL)
 		device = argv[1];
 	else
 		printf ("no device specified, defaulting to %s\n", device);
 
-	/* bzero (buf, sizeof(buf)); */
+	serial = serial_open (device, &fd);
 
-    serial = serial_open (device, &fd);
+	if (serial == -1) {
+		err(1, "Serial open of %s failed", device);
+		exit(1);
+	}
 
-    if (serial == -1) {
-        err(1, "Serial open of %s failed", device);
-        exit(1);
-    }
-    
-    /* Prepare the reader with a reset */
-    msr_reset (fd);
+	/* Prepare the reader with a reset */
+	msr_reset (fd);
 
-    /* Test the reader connection */
-    comtest (fd);
+	/* Test the reader connection */
+ 	comtest (fd);
 
-    /* Get the device model */
-    get_device_model (fd);
+	/* Get the device model */
+	get_device_model (fd);
+	/* Get the firmware version information */
+	get_firmware_version (fd);
 
-    /* Get the firmware version information */
-    get_firmware_version (fd);
+	/* Test the mag sensor */
+	msr_sensor_test (fd);
 
-    /* Test the mag sensor */
-    msr_sensor_test (fd);
+	/* Ram test */
+	msr_ram_test (fd);
 
-    /* Ram test */
-    msr_ram_test (fd);
+	/* Flash the LEDs to make things more 31337 */
+	printf("Preparing reader for reading...\n");
+	do_leet_led_dance (fd);
 
-    /* Flash the LEDs to make things more 31337 */
-    printf("Preparing reader for reading...\n");
-    /*do_leet_led_dance (fd);*/
+	printf("Ready to read an ISO formatted card. Please slide a card.\n");
 
-    printf("Ready to read an ISO formatted card. Please slide a card.\n");
+	/* Now we'll tell the reader we'd like to read the ISO formatted data */
+	bzero ((char *)&tracks, sizeof(tracks));
 
-    /* Now we'll tell the reader we'd like to read the ISO formatted data */
-    msr_iso_read (fd);
+	tracks.msr_tk1_len = MSR_MAX_TRACK_LEN;
+	tracks.msr_tk2_len = MSR_MAX_TRACK_LEN;
+	tracks.msr_tk3_len = MSR_MAX_TRACK_LEN;
 
-    /* We're finished */
+	msr_iso_read (fd, &tracks);
+
+	if (tracks.msr_tk1_len)
+		printf ("track1: [%s]\n", tracks.msr_tk1_data);
+	if (tracks.msr_tk2_len)
+		printf ("track2: [%s]\n", tracks.msr_tk2_data);
+	if (tracks.msr_tk3_len)
+		printf ("track3: [%s]\n", tracks.msr_tk3_data);
+
+	msr_reset (fd);
+
+	/* We're finished */
 	serial_close (fd);
 	exit(0);
 }

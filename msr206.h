@@ -1,5 +1,5 @@
 
-#ifdef _MSR206_H_
+#ifndef _MSR206_H_
 
 /* ESC is frequently used as a start delimiter character */
 
@@ -12,8 +12,12 @@
 #define MSR_STS_OK		0x30	/* Ok */
 #define MSR_STS_ERR		0x41	/* General error */
 
-/* Read/write commands */
+typedef struct msr_cmd {
+	uint8_t		msr_esc;
+	uint8_t		msr_cmd;
+} msr_cmd_t;
 
+/* Read/write commands */
 
 #define MSR_CMD_READ		0x72	/* Formatted read */
 #define MSR_CMD_WRITE		0x77	/* Formatted write */
@@ -27,10 +31,22 @@
 #define MSR_STS_RW_CMDBAD_ERR	0x34	/* Invalid command */
 #define MSR_STS_RW_SWIPEBAD_ERR	0x39	/* Invalud card swipe in write mode */
 
-/* Read/write start and end delimitesr. */
+typedef struct msr_end {
+	uint8_t		msr_enddelim;
+	uint8_t		msr_fs;
+	uint8_t		msr_esc;
+	uint8_t		msr_sts;
+} msr_end_t;
+
+/*
+ * Read/write start and end delimiters.
+ * The empty delimiter occurs when reading a track with no data.
+ */
 
 #define MSR_RW_START		0x73	/* 's' */
 #define MSR_RW_END		0x3F	/* '?' */
+#define MSR_RW_BAD		0x2A	/* '*' */
+#define MSR_RW_EMPTY		0x2B	/* '+' */
 
 /*
  * Serial port communications test
@@ -39,7 +55,7 @@
  */
 
 #define MSR_CMD_DIAG_COMM	0x65	/* Communications test */
-#define MSR_STS_COMM_OK		MSR_STS_OK
+#define MSR_STS_COMM_OK		0x79
 
 /*
  * Sensor diagnostic command. Will respond with MSR_STS_OK once
@@ -52,7 +68,7 @@
 /*
  * RAM diagnostic command. Will return MSR_STS_OK if RAM checks
  * good, otherwise MSR_STS_ERR.
- *
+ */
 
 #define MSR_CMD_DIAG_RAM	0x87	/* RAM test */
 #define MSR_STS_RAM_OK		MSR_STS_OK
@@ -65,7 +81,7 @@
 
 #define MSR_CMD_SLZ		0x7A	/* Set leading zeros */
 #define MSR_STS_SLZ_OK		MSR_STS_OK
-#define MSR_STS_SLZ_OK		MSR_STS_ERR
+#define MSR_STS_SLZ_ERR		MSR_STS_ERR
 
 /*
  * Get leading zero count. Returns leading zero counts for
@@ -75,6 +91,7 @@
 #define MSR_CMD_CLZ		0x6C	/* Check leading zeros */
 
 typedef struct msr_lz {
+	uint8_t		msr_esc;
 	uint8_t		msr_lz_tk1_3;
 	uint8_t		msr_lz_tk2;
 } msr_lz_t;
@@ -89,10 +106,9 @@ typedef struct msr_lz {
 #define MSR_STS_ERASE_ERR	MSR_STS_ERR
 
 #define MSR_ERASE_TK1		0x00
-#define MSR_ERASE_TK2		0x01
-#define MSR_ERASE_TK3		0x02
-#define MSR_ERASE_TK1		0x03
-#define MSR_ERASE_TK1_TK2	0x04
+#define MSR_ERASE_TK2		0x02
+#define MSR_ERASE_TK3		0x04
+#define MSR_ERASE_TK1_TK2	0x03
 #define MSR_ERASE_TK1_TK3	0x05
 #define MSR_ERASE_TK2_TK3	0x06
 #define MSR_ERASE_ALL		0x07
@@ -114,10 +130,16 @@ typedef struct msr_lz {
 #define MSR_CMD_MODEL		0x74	/* Read model */
 #define MSR_STS_MODEL_OK	0x53
 
-#define MSR_MODEL_MSR206_1	0x1
-#define MSR_MODEL_MSR206_2	0x2
-#define MSR_MODEL_MSR206_3	0x3
-#define MSR_MODEL_MSR206_5	0x5
+#define MSR_MODEL_MSR206_1	0x31
+#define MSR_MODEL_MSR206_2	0x32
+#define MSR_MODEL_MSR206_3	0x33
+#define MSR_MODEL_MSR206_5	0x35
+
+typedef struct msr_model {
+	uint8_t		msr_esc;
+	uint8_t		msr_model;
+	uint8_t		msr_s;
+} msr_model_t;
 
 /*
  * Get firmware revision. Response is a string in
@@ -135,10 +157,11 @@ typedef struct msr_lz {
 /*
  * Set bits per character. Returns MSR_STS_OK on success, accompanied
  * by resulting per-track BPC settings.
+ */
 
 #define MSR_CMD_SETBPC		0x6F	/* Set bits per character */
-#defien MSR_STS_BPC_OK		MSR_STS_OK
-#defien MSR_STS_BPC_ERR		MSR_STS_ERR
+#define MSR_STS_BPC_OK		MSR_STS_OK
+#define MSR_STS_BPC_ERR		MSR_STS_ERR
 
 typedef struct msr_bpc {
 	uint8_t		msr_bpctk1;
@@ -152,8 +175,8 @@ typedef struct msr_bpc {
 
 #define MSR_CMD_SETCO_HI	0x78	/* Set coercivity high */
 #define MSR_CMD_SETCO_LO	0x79	/* Set coercivity low */
-#defien MSR_STS_CO_OK		MSR_STS_OK
-#defien MSR_STS_CO_ERR		MSR_STS_ERR
+#define MSR_STS_CO_OK		MSR_STS_OK
+#define MSR_STS_CO_ERR		MSR_STS_ERR
 
 /*
  * Get coercivity. Returns 'H' for high coercivity, 'L' for low.
