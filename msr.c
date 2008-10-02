@@ -409,6 +409,7 @@ int main(int argc, char * argv[])
 	int fd = -1;
 	int serial;
 	msr_tracks_t tracks;
+	int i;
 
 	/* Default device selection per platform */
 #ifdef __linux__ 
@@ -468,13 +469,30 @@ int main(int argc, char * argv[])
 	if (tracks.msr_tk3_len)
 		printf ("track3: [%s]\n", tracks.msr_tk3_data);
 
-	printf("Ready to read an raw formatted card. Please slide a card.\n");
+	/* Now perform a raw read instead. */
+
+	printf("Ready to read a raw formatted card. Please slide a card.\n");
 
 	tracks.msr_tk1_len = MSR_MAX_TRACK_LEN;
 	tracks.msr_tk2_len = MSR_MAX_TRACK_LEN;
 	tracks.msr_tk3_len = MSR_MAX_TRACK_LEN;
 
-	msr_iso_read (fd, &tracks);
+	printf ("track1: ");
+	for (i = 0; i < tracks.msr_tk1_len; i++)
+		printf ("[%x]", tracks.msr_tk1_data[i]);
+	printf ("\n");
+
+	printf ("track2: ");
+	for (i = 0; i < tracks.msr_tk2_len; i++)
+		printf ("[%x]", tracks.msr_tk2_data[i]);
+	printf ("\n");
+
+	printf ("track3: ");
+	for (i = 0; i < tracks.msr_tk3_len; i++)
+		printf ("[%x]", tracks.msr_tk3_data[i]);
+	printf ("\n");
+
+	msr_raw_read (fd, &tracks);
 
 	msr_reset (fd);
 
