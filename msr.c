@@ -170,7 +170,7 @@ do_leet_led_dance (int fd)
 }
 
 int
-gettrack (int fd, int t, uint8_t * buf, uint8_t * len)
+gettrack_iso (int fd, int t, uint8_t * buf, uint8_t * len)
 {
 	uint8_t b;
 	int i = 0;
@@ -220,6 +220,49 @@ gettrack (int fd, int t, uint8_t * buf, uint8_t * len)
 	}
 
 	return (-1);
+}
+
+int
+gettrack_raw (int fd, int t, uint8_t * buf, uint8_t * len)
+{
+	uint8_t b, s;
+	int i = 0;
+	int l = 0;
+
+	/* Start delimiter should be ESC <track number> */
+
+	serial_readchar (fd, &b);
+	if (b != MSR_ESC) {
+		printf("NOT AN ESCAPE (%x)...\n", b);
+		return (-1);
+	}
+
+	serial_readchar (fd, &b);
+	if (b != t) {
+		printf("NOT A TRACK (%x)...\n", b);
+		return (-1);
+	}
+
+	serial_readchar (fd, &s);
+
+	if (!s) {
+		printf ("TRACK %d IS EMPTY\n", t);
+		return (0);
+	}
+
+	for (i = 0; i < s; i++) {
+		serial_readchar (fd, &b);
+		printf("[%x]", b);
+		/* Avoid overflowing the buffer */
+		if (i < *len) {
+			l++;
+			buf[i] = b;
+		}
+	}
+
+	printf ("\nREAD %d BYTES FROM TRACK %d\n", s, t);
+
+	return (0);
 }
 
 int 
@@ -328,9 +371,32 @@ msr_iso_read(int fd, msr_tracks_t * tracks)
 	if (getstart (fd) == -1)
 		err(1, "get start delimiter failed");
 
-	gettrack (fd, 1, tracks->msr_tk1_data, &tracks->msr_tk1_len);
-	gettrack (fd, 2, tracks->msr_tk2_data, &tracks->msr_tk2_len);
-	gettrack (fd, 3, tracks->msr_tk3_data, &tracks->msr_tk3_len);
+	gettrack_iso (fd, 1, tracks->msr_tk1_data, &tracks->msr_tk1_len);
+	gettrack_iso (fd, 2, tracks->msr_tk2_data, &tracks->msr_tk2_len);
+	gettrack_iso (fd, 3, tracks->msr_tk3_data, &tracks->msr_tk3_len);
+
+	if (getend (fd) == -1)
+		err(1, "read failed");
+
+	return (0);
+}
+
+int
+msr_raw_read(int fd, msr_tracks_t * tracks)
+{
+	int r; 
+
+	r = msr_cmd (fd, MSR_CMD_RAW_READ);
+
+	if (r == -1)
+		err(1, "Command write failed");
+
+	if (getstart (fd) == -1)
+		err(1, "get start delimiter failed");
+
+	gettrack_raw (fd, 1, tracks->msr_tk1_data, &tracks->msr_tk1_len);
+	gettrack_raw (fd, 2, tracks->msr_tk2_data, &tracks->msr_tk2_len);
+	gettrack_raw (fd, 3, tracks->msr_tk3_data, &tracks->msr_tk3_len);
 
 	if (getend (fd) == -1)
 		err(1, "read failed");
@@ -401,6 +467,14 @@ int main(int argc, char * argv[])
 		printf ("track2: [%s]\n", tracks.msr_tk2_data);
 	if (tracks.msr_tk3_len)
 		printf ("track3: [%s]\n", tracks.msr_tk3_data);
+
+	printf("Ready to read an raw formatted card. Please slide a card.\n");
+
+	tracks.msr_tk1_len = MSR_MAX_TRACK_LEN;
+	tracks.msr_tk2_len = MSR_MAX_TRACK_LEN;
+	tracks.msr_tk3_len = MSR_MAX_TRACK_LEN;
+
+	msr_iso_read (fd, &tracks);
 
 	msr_reset (fd);
 
