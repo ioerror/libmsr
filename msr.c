@@ -29,6 +29,16 @@ msr_cmd (int fd, uint8_t c)
 	return (serial_write (fd, &cmd, sizeof(cmd)));
 }
 
+int msr_zeros (int fd)
+{
+	msr_lz_t lz;
+
+	msr_cmd (fd, MSR_CMD_CLZ);
+	serial_read (fd, &lz, sizeof(lz));
+	printf("zero13: %d zero: %d\n", lz.msr_lz_tk1_3, lz.msr_lz_tk2);
+	return (0);
+}
+
 int
 getstart (int fd)
 {
@@ -180,43 +190,40 @@ gettrack_iso (int fd, int t, uint8_t * buf, uint8_t * len)
 
 	serial_readchar (fd, &b);
 	if (b != MSR_ESC) {
-		printf("NOT AN ESCAPE (%x)...\n", b);
+		*len = 0;
 		return (-1);
 	}
 
 	serial_readchar (fd, &b);
 	if (b != t) {
-		printf("NOT A TRACK (%x)...\n", b);
+		*len = 0;
 		return (-1);
 	}
 
 	while (1) {
 		serial_readchar (fd, &b);
+		if (b == '%')
+			continue;
+		if (b == ';')
+			continue;
+		if (b == MSR_RW_END)
+			break;
 		if (b == MSR_ESC)
 			break;
-		printf("%c", b);
 		/* Avoid overflowing the buffer */
 		if (i < *len) {
 			l++;
 			buf[i] = b;
 		}
 		i++;
-		if (b == MSR_RW_END)
-			break;
 	}
-
 
 	if (b == MSR_RW_END) {
 		*len = l;
-		printf("\nTRACK %d READ FINISHED, GOT %d BYTES\n", t, l);
 		return (0);
 	} else {
 		*len = 0;
 		serial_readchar (fd, &b);
-		if (b == MSR_RW_EMPTY)
-			printf("TRACK %d READ IS EMPTY\n", t);
-		if (b == MSR_RW_BAD)
-			printf("TRACK %d READ ERROR\n", t);
 	}
 
 	return (-1);
@@ -233,26 +240,25 @@ gettrack_raw (int fd, int t, uint8_t * buf, uint8_t * len)
 
 	serial_readchar (fd, &b);
 	if (b != MSR_ESC) {
-		printf("NOT AN ESCAPE (%x)...\n", b);
+		*len = 0;
 		return (-1);
 	}
 
 	serial_readchar (fd, &b);
 	if (b != t) {
-		printf("NOT A TRACK (%x)...\n", b);
+		*len = 0;
 		return (-1);
 	}
 
 	serial_readchar (fd, &s);
 
 	if (!s) {
-		printf ("TRACK %d IS EMPTY\n", t);
+		*len = 0;
 		return (0);
 	}
 
 	for (i = 0; i < s; i++) {
 		serial_readchar (fd, &b);
-		printf("[%x]", b);
 		/* Avoid overflowing the buffer */
 		if (i < *len) {
 			l++;
@@ -260,7 +266,7 @@ gettrack_raw (int fd, int t, uint8_t * buf, uint8_t * len)
 		}
 	}
 
-	printf ("\nREAD %d BYTES FROM TRACK %d\n", s, t);
+	*len = s;
 
 	return (0);
 }
@@ -340,11 +346,11 @@ msr_set_lo_co (int fd)
 	serial_read (fd, &b, 2);
  
 	if (b[0] == MSR_ESC && b[1] == MSR_STS_OK) {
-		printf("We were able to put the writer into Hi-Co mode.\n");
+		printf("We were able to put the writer into Lo-Co mode.\n");
 		return (0);
 	}
    
-	printf("It appears that the reader did not switch to Hi-Co mode.");
+	printf("It appears that the reader did not switch to Lo-Co mode.");
 	return (1);
 }
 
@@ -362,6 +368,7 @@ int
 msr_iso_read(int fd, msr_tracks_t * tracks)
 {
 	int r; 
+	int i;
 
 	r = msr_cmd (fd, MSR_CMD_READ);
 
@@ -371,12 +378,67 @@ msr_iso_read(int fd, msr_tracks_t * tracks)
 	if (getstart (fd) == -1)
 		err(1, "get start delimiter failed");
 
-	gettrack_iso (fd, 1, tracks->msr_tk1_data, &tracks->msr_tk1_len);
-	gettrack_iso (fd, 2, tracks->msr_tk2_data, &tracks->msr_tk2_len);
-	gettrack_iso (fd, 3, tracks->msr_tk3_data, &tracks->msr_tk3_len);
+	for (i = 0; i < MSR_MAX_TRACKS; i++)
+		gettrack_iso (fd, i + 1, tracks->msr_tracks[i].msr_tk_data,
+		    &tracks->msr_tracks[i].msr_tk_len);
 
-	if (getend (fd) == -1)
-		err(1, "read failed");
+	if (getend (fd) == -1) {
+		warnx("read failed");
+		return (-1);
+	}
+
+	return (0);
+}
+
+int
+msr_erase (int fd, uint8_t tracks)
+{
+	uint8_t b[2];
+
+	msr_cmd (fd, MSR_CMD_ERASE);
+	serial_write (fd, &tracks, 1);
+
+	if (serial_read (fd, b, 2) == -1)
+		err(1, "read erase response failed");
+	if (b[0] == MSR_ESC && b[1] == MSR_STS_ERASE_OK) {
+		printf("Erase successfull\n");
+		return (0);
+	} else
+		printf ("%x %x\n", b[0], b[1]);
+
+	return (-1);
+}
+
+int
+msr_iso_write(int fd, msr_tracks_t * tracks)
+{
+	int i;
+	uint8_t buf[4];
+
+	msr_cmd (fd, MSR_CMD_WRITE);
+
+
+	buf[0] = MSR_ESC;
+	buf[1] = MSR_RW_START;
+	serial_write (fd, buf, 2);
+
+	for (i = 0; i < MSR_MAX_TRACKS; i++) {
+		buf[0] = MSR_ESC;
+		buf[1] = i + 1;
+		serial_write (fd, buf, 2);
+		serial_write (fd, tracks->msr_tracks[i].msr_tk_data,
+			tracks->msr_tracks[i].msr_tk_len);
+	}
+
+	buf[0] = MSR_RW_END;
+	buf[1] = MSR_FS;
+	serial_write (fd, buf, 2);
+
+	serial_readchar (fd, &buf[0]);
+	serial_readchar (fd, &buf[0]);
+
+	if (buf[0] != MSR_STS_OK)
+		warnx("write failed");
 
 	return (0);
 }
@@ -385,6 +447,7 @@ int
 msr_raw_read(int fd, msr_tracks_t * tracks)
 {
 	int r; 
+	int i;
 
 	r = msr_cmd (fd, MSR_CMD_RAW_READ);
 
@@ -394,9 +457,9 @@ msr_raw_read(int fd, msr_tracks_t * tracks)
 	if (getstart (fd) == -1)
 		err(1, "get start delimiter failed");
 
-	gettrack_raw (fd, 1, tracks->msr_tk1_data, &tracks->msr_tk1_len);
-	gettrack_raw (fd, 2, tracks->msr_tk2_data, &tracks->msr_tk2_len);
-	gettrack_raw (fd, 3, tracks->msr_tk3_data, &tracks->msr_tk3_len);
+	for (i = 0; i < MSR_MAX_TRACKS; i++)
+		gettrack_raw (fd, i + 1, tracks->msr_tracks[i].msr_tk_data,
+		    &tracks->msr_tracks[i].msr_tk_len);
 
 	if (getend (fd) == -1)
 		err(1, "read failed");
@@ -436,10 +499,15 @@ int main(int argc, char * argv[])
 	/* Test the reader connection */
  	comtest (fd);
 
+	/* Prepare the reader with a reset */
+	msr_reset (fd);
+
 	/* Get the device model */
 	get_device_model (fd);
 	/* Get the firmware version information */
 	get_firmware_version (fd);
+
+	msr_set_lo_co (fd);
 
 	/* Test the mag sensor */
 	msr_sensor_test (fd);
@@ -456,43 +524,70 @@ int main(int argc, char * argv[])
 	/* Now we'll tell the reader we'd like to read the ISO formatted data */
 	bzero ((char *)&tracks, sizeof(tracks));
 
-	tracks.msr_tk1_len = MSR_MAX_TRACK_LEN;
-	tracks.msr_tk2_len = MSR_MAX_TRACK_LEN;
-	tracks.msr_tk3_len = MSR_MAX_TRACK_LEN;
+	for (i = 0; i < MSR_MAX_TRACKS; i++)
+		tracks.msr_tracks[i].msr_tk_len = MSR_MAX_TRACK_LEN;
 
 	msr_iso_read (fd, &tracks);
 
-	if (tracks.msr_tk1_len)
-		printf ("track1: [%s]\n", tracks.msr_tk1_data);
-	if (tracks.msr_tk2_len)
-		printf ("track2: [%s]\n", tracks.msr_tk2_data);
-	if (tracks.msr_tk3_len)
-		printf ("track3: [%s]\n", tracks.msr_tk3_data);
+	for (i = 0; i < MSR_MAX_TRACKS; i++) {
+		if (tracks.msr_tracks[i].msr_tk_len)
+			printf ("track%d: [%s]\n", i,
+				tracks.msr_tracks[i].msr_tk_data);
+	}
 
-	/* Now perform a raw read instead. */
+	/* Prepare the reader with a reset */
+	msr_reset (fd);
 
-	printf("Ready to read a raw formatted card. Please slide a card.\n");
+	/* Test the reader connection */
+ 	comtest (fd);
 
-	tracks.msr_tk1_len = MSR_MAX_TRACK_LEN;
-	tracks.msr_tk2_len = MSR_MAX_TRACK_LEN;
-	tracks.msr_tk3_len = MSR_MAX_TRACK_LEN;
+	/* Prepare the reader with a reset */
+	msr_reset (fd);
 
-	printf ("track1: ");
-	for (i = 0; i < tracks.msr_tk1_len; i++)
-		printf ("[%x]", tracks.msr_tk1_data[i]);
-	printf ("\n");
+	printf ("Attempting erase, please swipe card...\n");
+	msr_erase (fd, MSR_ERASE_ALL);
 
-	printf ("track2: ");
-	for (i = 0; i < tracks.msr_tk2_len; i++)
-		printf ("[%x]", tracks.msr_tk2_data[i]);
-	printf ("\n");
+	/* Prepare the reader with a reset */
+	msr_reset (fd);
 
-	printf ("track3: ");
-	for (i = 0; i < tracks.msr_tk3_len; i++)
-		printf ("[%x]", tracks.msr_tk3_data[i]);
-	printf ("\n");
+	/* Test the reader connection */
+ 	comtest (fd);
 
+	/* Prepare the reader with a reset */
+	msr_reset (fd);
+
+	printf ("Attempting ISO write, please swipe card...\n");
+
+#ifdef notdef
+	tracks.msr_tracks[0].msr_tk_len = 3;
+	strcpy (tracks.msr_tracks[0].msr_tk_data, "MOO");
+	tracks.msr_tracks[1].msr_tk_len = 3;
+	strcpy (tracks.msr_tracks[1].msr_tk_data, "123");
+	tracks.msr_tracks[2].msr_tk_len = 3;
+	strcpy (tracks.msr_tracks[2].msr_tk_data, "456");
+#endif
+
+	msr_iso_write (fd, &tracks);
+
+	printf ("write complete\n");
+
+#ifdef notdef
+	bzero ((char *)&tracks, sizeof(tracks));
+
+	for (i = 0; i < MSR_MAX_TRACKS; i++)
+		tracks.msr_tracks[i].msr_tk_len = MSR_MAX_TRACK_LEN;
+
+	printf("Ready to do a raw read. Please slide a card.\n");
 	msr_raw_read (fd, &tracks);
+
+	for (i = 0; i < MSR_MAX_TRACKS; i++) {
+		int x;
+		printf("track%d: ", i);
+		for (x = 0; x < tracks.msr_tracks[i].msr_tk_len; x++)
+			printf("%x ", tracks.msr_tracks[i].msr_tk_data[x]);
+		printf("\n");
+	}
+#endif
 
 	msr_reset (fd);
 

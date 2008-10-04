@@ -6,12 +6,13 @@
  */
 
 #define MSR_MAX_TRACK_LEN 255
+#define MSR_MAX_TRACKS 3
+
+typedef struct msr_track {
+	uint8_t		msr_tk_data[MSR_MAX_TRACK_LEN];
+	uint8_t		msr_tk_len;
+} msr_track_t;
 
 typedef struct msr_tracks {
-	uint8_t		msr_tk1_data[MSR_MAX_TRACK_LEN];
-	uint8_t		msr_tk1_len;
-	uint8_t		msr_tk2_data[MSR_MAX_TRACK_LEN];
-	uint8_t		msr_tk2_len;
-	uint8_t		msr_tk3_data[MSR_MAX_TRACK_LEN];
-	uint8_t		msr_tk3_len;
+	msr_track_t	msr_tracks[MSR_MAX_TRACKS];
 } msr_tracks_t;
