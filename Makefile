@@ -3,8 +3,8 @@
 CFLAGS=	-Wall -g -ansi -pedantic
 
 LIB=	libmsr.a
-LIBSRCS=	serialio.c
-LIBOBJS=	serialio.o
+LIBSRCS=	serialio.c msr206.c
+LIBOBJS=	serialio.o msr206.o
 
 UTIL=	msr
 UTILSRCS=	msr.c

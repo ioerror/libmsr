@@ -16,3 +16,20 @@ typedef struct msr_track {
 typedef struct msr_tracks {
 	msr_track_t	msr_tracks[MSR_MAX_TRACKS];
 } msr_tracks_t;
+
+extern int msr_zeros (int);
+extern int msr_commtest (int);
+extern int msr_init (int);
+extern int msr_fwrev (int);
+extern int msr_model (int);
+extern int msr_sensor_test (int);
+extern int msr_ram_test (int);
+extern int msr_set_hi_co (int);
+extern int msr_set_lo_co (int);
+extern int msr_iso_read (int, msr_tracks_t *);
+extern int msr_iso_write (int, msr_tracks_t *);
+extern int msr_raw_read (int, msr_tracks_t *);
+extern int msr_erase (int, uint8_t);
+extern int msr_flash_led (int, uint8_t);
+extern int msr_set_bpi (int, uint8_t);
+extern int msr_set_bpc (int, uint8_t, uint8_t, uint8_t);
