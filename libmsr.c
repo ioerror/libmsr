@@ -13,7 +13,14 @@ msr_dumpbits (uint8_t * buf, int len)
 	int		bytes, i;
 
 	for (bytes = 0; bytes < len; bytes++) {
-		/* for (i = 0; i < 8; i++) { */
+
+		/*
+		 * Note: we want to display the bits in the order in
+		 * which they're read off the card, which means we
+		 * have to decode each byte from most significant bit
+		 * to least significant bit.
+		 */
+
 		for (i = 7; i > -1; i--) {
 			if (buf[bytes] & (1 << i))
 				printf("1");
@@ -74,15 +81,15 @@ msr_decode(uint8_t * inbuf, uint8_t inlen,
 	uint8_t * b;
 	uint8_t len;
 	int ch = 0;
-	int bits = 0;
 	char byte = 0;
-	int i;
+	int i, x;
 
 	len = inlen;
 	b = inbuf;
+	x = 0;
 
 	for (i = 0; i < len * 8; i++) {
-		byte |= msr_getbit (b, len, bits) << ch;
+		byte |= msr_getbit (b, len, i) << ch;
 		if (ch == (bpc - 1)) {
 			/* Strip the parity bit */
 			byte &= ~(1 << ch);
@@ -96,14 +103,28 @@ msr_decode(uint8_t * inbuf, uint8_t inlen,
 					byte -= 0x20;
 				}
 			}
-				
+
+			outbuf[x] = byte;
+			x++;
+			/* Don't overflow output buffer */
+			if (x == outlen)
+				break;
+#ifdef MSR_DEBUG
 			printf ("%c", byte);
+#endif
 			ch = 0;
 			byte = 0;
 		} else
 			ch++;
-		bits++;
 	}
+
+#ifdef MSR_DEBUG
 	printf ("\n");
+#endif
+
+	/* Output buffer was too small. */
+	if (x == outlen)
+		return (-1);
+
 	return (0);
 }
