@@ -76,7 +76,7 @@ msr_setbit (uint8_t * buf, uint8_t len, int bit, int val)
 
 int
 msr_decode(uint8_t * inbuf, uint8_t inlen,
-    uint8_t * outbuf, uint8_t outlen, int bpc)
+    uint8_t * outbuf, uint8_t * outlen, int bpc)
 {
 	uint8_t * b;
 	uint8_t len;
@@ -107,7 +107,7 @@ msr_decode(uint8_t * inbuf, uint8_t inlen,
 			outbuf[x] = byte;
 			x++;
 			/* Don't overflow output buffer */
-			if (x == outlen)
+			if (x == *outlen)
 				break;
 #ifdef MSR_DEBUG
 			printf ("%c", byte);
@@ -123,8 +123,9 @@ msr_decode(uint8_t * inbuf, uint8_t inlen,
 #endif
 
 	/* Output buffer was too small. */
-	if (x == outlen)
+	if (x == *outlen)
 		return (-1);
+	*outlen = x;
 
 	return (0);
 }
