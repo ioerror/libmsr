@@ -135,7 +135,7 @@ serial_open(char *path, int * fd)
 {
 	int		f;
 
-	f = open(path, O_RDWR | O_FSYNC | O_NONBLOCK);
+	f = open(path, O_RDWR | O_FSYNC);
 
 	if (f == -1)
 		return (-1);
