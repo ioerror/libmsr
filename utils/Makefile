@@ -1,4 +1,4 @@
-# This currently builds a user space program and not a useful library
+# This currently builds some sample user space programs
 
 CFLAGS =	-I.. -Wall -g -ansi -pedantic
 LDFLAGS = -L.. -lmsr
