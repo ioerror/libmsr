@@ -28,8 +28,8 @@ $(UTIL): $(UTILOBJS)
 	$(CC) $(CFLAGS) -o $@ -c $<
 
 install: 
-	install -m655 -D $(UTIL) $(DESTDIR)/usr/bin/$(UTIL)
-	install -m655 -D $(LIB) $(DESTDIR)/usr/$(LIB)
+	install -m755 -D $(UTIL) $(DESTDIR)/usr/bin/$(UTIL)
+	install -m644 -D $(LIB) $(DESTDIR)/usr/$(LIB)
 	for subdir in $(SUBDIRS); do \
 	  (cd $$subdir && $(MAKE) install); \
 	done
