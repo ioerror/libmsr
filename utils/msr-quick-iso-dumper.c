@@ -68,7 +68,7 @@ do {
 		int x;
 		printf("track%d: ", i);
 		for (x = 0; x < tracks.msr_tracks[i].msr_tk_len; x++)
-			printf("%x ", tracks.msr_tracks[i].msr_tk_data[x]);
+			printf("%02x ", tracks.msr_tracks[i].msr_tk_data[x]);
 		printf("\n");
 	}
 } while (1);

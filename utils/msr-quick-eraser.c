@@ -17,8 +17,6 @@ int main(int argc, char * argv[])
 {
 	int fd = -1;
 	int serial;
-	msr_tracks_t tracks;
-	int i;
 
 	/* Default device selection per platform */
 #ifdef __linux__
