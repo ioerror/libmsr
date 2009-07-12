@@ -33,3 +33,7 @@ install:
 
 clean:
 	rm -rf *.o *~ $(LIB) $(UTIL)
+	for subdir in $(SUBDIRS); do \
+		(cd $$subdir && $(MAKE) clean); \
+	done
+
