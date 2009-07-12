@@ -14,8 +14,8 @@ UTILOBJS=	$(UTILSRCS:.c=.o)
 SUBDIRS=utils
 
 all:	$(LIB) $(UTIL)
-	list='$(SUBDIRS)'; for subdir in $$list; do \
-	  test "$$subdir" = . || (cd $$subdir && $(MAKE) $(AM_MAKEFLAGS)); \
+	for subdir in $(SUBDIRS); do \
+	  (cd $$subdir && $(MAKE) all); \
 	done
 
 $(LIB): $(LIBOBJS)
@@ -27,13 +27,15 @@ $(UTIL): $(UTILOBJS)
 .c.o:
 	$(CC) $(CFLAGS) -o $@ -c $<
 
-install:
-	install -m655 $(UTIL) $(DESTDIR)/usr/bin/$(UTIL)
-	install -m655 $(LIB) $(DESTDIR)/usr/$(LIB)
+install: 
+	install -m655 -D $(UTIL) $(DESTDIR)/usr/bin/$(UTIL)
+	install -m655 -D $(LIB) $(DESTDIR)/usr/$(LIB)
+	for subdir in $(SUBDIRS); do \
+	  (cd $$subdir && $(MAKE) install); \
+	done
 
 clean:
 	rm -rf *.o *~ $(LIB) $(UTIL)
 	for subdir in $(SUBDIRS); do \
-		(cd $$subdir && $(MAKE) clean); \
+	  (cd $$subdir && $(MAKE) clean); \
 	done
-
