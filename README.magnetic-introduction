@@ -6,7 +6,7 @@ obvious issues with data alignment. Traditional ISO encoded data is written
 perpendicular to the length of the magnetic stripe. Proprietary cards may
 use alternate physical angles even if they use ISO format error coding.
 
-Magnetic cards are often encoded with a specific magnetic field strength.
+Magnetic cards are encoded with a specific magnetic field strength.
 This field strength is measured in Oersted (commonly abbreviated as Oe):
 
 	http://en.wikipedia.org/wiki/Oersted
