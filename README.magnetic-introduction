@@ -1,0 +1,40 @@
+This is a collection of related and useful notes that you should read if you're
+interested in magstripes. It is useful to see the phyisical layer of magnetic
+information before you attempt to analyze it with actual hardware. Using a
+viewer or developer is a very useful first step. This will help you see very
+obvious issues with data alignment. Traditional ISO encoded data is written
+perpendicular to the length of the magnetic stripe. Proprietary cards may
+use alternate physical angles even if they use ISO format error coding.
+
+Magnetic cards are often encoded with a specific magnetic field strength.
+This field strength is measured in Oersted (commonly abbreviated as Oe):
+
+	http://en.wikipedia.org/wiki/Oersted
+
+If you'd like to do visual inspection of small amounts of magnetic material,
+you may want to invest in a basic Arnold Magnetics viewer:
+
+	https://www.arnoldmagnetics.com/v2/sales/ProductTOC.aspx?id=238
+
+If you have special needs relating to audio tapes and magnetics, you may be
+interested in a liquid magnetic developer such as the Sprague-Mag HCFC 141B:
+
+	http://www.sprague-magnetics.com/audio.htm#magdev
+
+You'll want to have a reader for experimentation. It's a good idea to get a
+high quaility MSR-206 3 track hi-co/lo-co reader/writer:
+
+	http://www.tyner.com/magnetic/msr_206_reader_writer.htm
+
+It's very useful to read the various related magnetic stripe ISO standards:
+
+	http://en.wikipedia.org/wiki/ISO/IEC_7810
+	http://en.wikipedia.org/wiki/ISO/IEC_7811
+	http://en.wikipedia.org/wiki/ISO/IEC_7812
+	http://en.wikipedia.org/wiki/ISO/IEC_7813
+	http://en.wikipedia.org/wiki/ISO_8583
+
+Another helpful starter is the Wikipedia's magnetic stripe page:
+
+	http://en.wikipedia.org/wiki/Magnetic_stripe
+
