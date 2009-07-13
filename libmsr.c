@@ -129,3 +129,65 @@ msr_decode(uint8_t * inbuf, uint8_t inlen,
 
 	return (0);
 }
+
+/* Some cards require a swipe in the opposite direction of the reader. */
+/* We can get the expected bit stream by reversing the data in place. */
+int
+msr_reverse_tracks (msr_tracks_t * tracks)
+{
+	int i, status;
+	for (i = 0; i < MSR_MAX_TRACKS; i++) {
+		status = msr_reverse_track(i, tracks);
+		if (status != 0) {
+			printf("Unable to reverse track: %i\n", i);
+			status = -1;
+			break;
+		}
+	}
+	return status;
+}
+
+/* We want to take a track and reverse the order of each byte. */
+/* Additionally, we want to flip each byte. */
+int
+msr_reverse_track (int track_number, msr_tracks_t * tracks)
+{
+	int i;
+	int status = 0;
+	int bytes_to_shuffle;
+	char first_byte;
+	char last_byte;
+	unsigned char * head;
+	unsigned char * tail;
+
+	/* First we need to know the size of the track */
+	bytes_to_shuffle = tracks->msr_tracks[track_number].msr_tk_len;
+
+	/* Then we need to read each byte from a track */
+	for (i=0; i <= bytes_to_shuffle / 2; i++) {
+		head = &tracks->msr_tracks[track_number].msr_tk_data[i];
+		tail = &tracks->msr_tracks[track_number].msr_tk_data[(bytes_to_shuffle -1) -i];
+		/* Reverse the full track byte order */
+		first_byte = msr_reverse_byte(*head);
+		last_byte = msr_reverse_byte(*tail);
+		/* Reverse the byte order */
+		*head = last_byte;
+		*tail = first_byte;
+	}
+	return status;
+}
+
+/* Reverse a byte. */
+const unsigned char
+msr_reverse_byte(const unsigned char byte)
+{
+	return
+	((byte & 1<<7) >> 7) |
+	((byte & 1<<6) >> 5) |
+	((byte & 1<<5) >> 3) |
+	((byte & 1<<4) >> 1) |
+	((byte & 1<<3) << 1) |
+	((byte & 1<<2) << 3) |
+	((byte & 1<<1) << 5) |
+	((byte & 1<<0) << 7);
+}

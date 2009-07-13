@@ -38,3 +38,7 @@ extern int msr_dumpbits (uint8_t *, int);
 extern int msr_getbit (uint8_t *, uint8_t, int);
 extern int msr_setbit (uint8_t *, uint8_t, int, int);
 extern int msr_decode (uint8_t *, uint8_t, uint8_t *, uint8_t *, int);
+
+extern int msr_reverse_tracks (msr_tracks_t *);
+extern int msr_reverse_track (int, msr_tracks_t *);
+extern const unsigned char msr_reverse_byte (const unsigned char);
