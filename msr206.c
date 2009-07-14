@@ -452,6 +452,41 @@ msr_raw_read(int fd, msr_tracks_t * tracks)
 }
 
 int
+msr_raw_write(int fd, msr_tracks_t * tracks)
+{
+	int i;
+	uint8_t buf[4];
+
+	msr_cmd (fd, MSR_CMD_RAW_WRITE);
+
+
+	buf[0] = MSR_ESC;
+	buf[1] = MSR_RW_START;
+	serial_write (fd, buf, 2);
+
+	for (i = 0; i < MSR_MAX_TRACKS; i++) {
+		buf[0] = MSR_ESC; /* start delimiter */
+		buf[1] = i + 1; /* track number */
+		buf[2] = tracks->msr_tracks[i].msr_tk_len; /* data length */
+		serial_write (fd, buf, 3);
+		serial_write (fd, tracks->msr_tracks[i].msr_tk_data,
+			tracks->msr_tracks[i].msr_tk_len);
+	}
+
+	buf[0] = MSR_RW_END;
+	buf[1] = MSR_FS;
+	serial_write (fd, buf, 2);
+
+	serial_readchar (fd, &buf[0]);
+	serial_readchar (fd, &buf[0]);
+
+	if (buf[0] != MSR_STS_OK)
+		warnx("raw write failed");
+
+	return (0);
+}
+
+int
 msr_init(int fd)
 {
 	msr_reset (fd);
