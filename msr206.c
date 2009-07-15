@@ -629,13 +629,24 @@ msr_iso_read(int fd, msr_tracks_t * tracks)
 }
 
 /* 
- * Erase a card
+ * Erase one or more tracks on a card
  *
  * This routine issues an MSR_CMD_ERASE command to the device to
  * read erase a magstripe card. After the command is issued,
  * the user must swipe a card through the MSR206. The function
  * will block until the device returns a response code indicating
  * that the erase operation completed successfully.
+ *
+ * This function can erase various combinations of tracks, or erase
+ * all of them, depending on the <tracks> value specified:
+ *
+ * MSR_ERASE_TK1	erase track 1 only
+ * MSR_ERASE_TK2	erase track 2 only
+ * MSR_ERASE_TK3	erase track 3 only
+ * MSR_ERASE_TK1_TK2	erase tracks 1 and 2
+ * MSR_ERASE_TK1_TK3	erase tracks 1 and 3
+ * MSR_ERASE_TK2_TK3	erase tracks 2 and 3
+ * MSR_ERASE_ALL	erase all tracks
  *
  * This function will fail if the serial port is not initialized
  * or the descriptor <fd> is invalid, or if the device does not
