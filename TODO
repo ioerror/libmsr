@@ -1,0 +1,15 @@
+Abstract out all commands into model specific headers.
+	If the model is generic, we'll reference the generic with macros
+
+Add support for the following hardware:
+
+	Mini-123
+	Mini-123EX
+	Mini-400
+	Mini-600
+	NMR-100
+	Omron S4YR-MVFW
+
+Implement some kind of data analysis. Perhaps with Stripe Snoop?
+
+	http://stripesnoop.sourceforge.net/
