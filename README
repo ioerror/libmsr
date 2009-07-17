@@ -1,1 +1,9 @@
-You'll probably want to take a look at the utils/ directory.
+libmsr - libmsr is basically magnetic stripe reading
+
+This is a library for various magnetic stripe reading and writing hardware.
+
+Generally, it requires a serial interface. In the future we may support
+other methods of access.
+
+You'll probably want to take a look at the utils/ directory for sample code
+that uses libmsr properly.
