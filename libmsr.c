@@ -177,6 +177,32 @@ msr_reverse_track (int track_number, msr_tracks_t * tracks)
 	return status;
 }
 
+/* Take a track structure and print it as hex bytes. */
+void
+msr_pretty_printer_hex (msr_tracks_t tracks)
+{
+	int track_number;
+	for (track_number = 0; track_number < MSR_MAX_TRACKS; track_number++) {
+		int x;
+		printf("Track %d: \n", track_number);
+		for (x = 0; x < tracks.msr_tracks[track_number].msr_tk_len; x++)
+			printf("%02x ", tracks.msr_tracks[track_number].msr_tk_data[x]);
+		printf("\n");
+	}
+}
+
+/* Take a track structure and print it as a string. */
+void
+msr_pretty_printer_string (msr_tracks_t tracks)
+{
+	int track_number;
+	for (track_number = 0; track_number < MSR_MAX_TRACKS; track_number++) {
+		if (tracks.msr_tracks[track_number].msr_tk_len)
+			printf ("Track %d: \n[%s]\n", track_number,
+			tracks.msr_tracks[track_number].msr_tk_data);
+	}
+}
+
 /* Reverse a byte. */
 const unsigned char
 msr_reverse_byte(const unsigned char byte)

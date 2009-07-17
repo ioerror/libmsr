@@ -42,4 +42,8 @@ extern int msr_decode (uint8_t *, uint8_t, uint8_t *, uint8_t *, int);
 
 extern int msr_reverse_tracks (msr_tracks_t *);
 extern int msr_reverse_track (int, msr_tracks_t *);
+
+extern void msr_pretty_printer_hex (msr_tracks_t tracks);
+extern void msr_pretty_printer_string (msr_tracks_t tracks);
+
 extern const unsigned char msr_reverse_byte (const unsigned char);
