@@ -7,13 +7,9 @@ LIB=	libmsr.a
 LIBSRCS=	libmsr.c serialio.c msr206.c
 LIBOBJS=	$(LIBSRCS:.c=.o)
 
-UTIL=	msr
-UTILSRCS=	msr.c
-UTILOBJS=	$(UTILSRCS:.c=.o)
-
 SUBDIRS=utils
 
-all:	$(LIB) $(UTIL)
+all:	$(LIB)
 	for subdir in $(SUBDIRS); do \
 	  (cd $$subdir && $(MAKE) all); \
 	done
@@ -21,21 +17,17 @@ all:	$(LIB) $(UTIL)
 $(LIB): $(LIBOBJS)
 	ar rcs $(LIB) $(LIBOBJS)
 
-$(UTIL): $(UTILOBJS)
-	$(CC) -o $(UTIL) $(UTILOBJS) $(LDFLAGS)
-
 .c.o:
 	$(CC) $(CFLAGS) -o $@ -c $<
 
 install: 
-	install -m755 -D $(UTIL) $(DESTDIR)/usr/bin/$(UTIL)
 	install -m644 -D $(LIB) $(DESTDIR)/usr/$(LIB)
 	for subdir in $(SUBDIRS); do \
 	  (cd $$subdir && $(MAKE) install); \
 	done
 
 clean:
-	rm -rf *.o *~ $(LIB) $(UTIL)
+	rm -rf *.o *~ $(LIB)
 	for subdir in $(SUBDIRS); do \
 	  (cd $$subdir && $(MAKE) clean); \
 	done
