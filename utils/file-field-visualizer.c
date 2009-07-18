@@ -50,6 +50,7 @@ int main(int argc, char **argv)
 		{
 		case '\n':
 			/* do nothing */
+			printf("> ");
 			continue;
 		case 'q':
 			/* quit */
@@ -72,13 +73,20 @@ int main(int argc, char **argv)
 			rbump(offset_card);
 			display_card(offset_card);
 			break;
+		case '?':
+			/* print some help */
+			printf("q - exit program\n");
+			printf("? - this help screen\n");
+			printf("j - next card\n");
+			printf("k - previous card\n");
+			printf("h - bit shift left\n");
+			printf("l - bit shift right\n");
+			break;
 		default:
 			/* warning */
 			printf("Unrecognized command.\n");
 			break;
 		}
-
-		printf("> ");
 	}
 
 	return 0;
