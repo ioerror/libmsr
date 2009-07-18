@@ -20,7 +20,6 @@ void display_card(const unsigned char *buffer);
 
 int main(int argc, char **argv)
 {
-	unsigned char a, b, byte;
 	unsigned char source_card[MAX_CARD_LEN];
 	unsigned char offset_card[MAX_CARD_LEN];
 	unsigned char command;
