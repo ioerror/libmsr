@@ -418,7 +418,7 @@ gettrack_raw (int fd, int t, uint8_t * buf, uint8_t * len)
 		}
 	}
 
-	*len = s;
+	*len = l;
 
 	return (0);
 }
