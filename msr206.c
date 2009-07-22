@@ -280,7 +280,7 @@ msr_flash_led (int fd, uint8_t led)
  *
  * This is a helper function used by msr_iso_read() to read a
  * single track in response to an ISO track read command. The routine
- * reads trach <t> into buffer <buf> of length <len>, via file
+ * reads track <t> into buffer <buf> of length <len>, via file
  * descriptor <fd>. The track data should be prefixed by an ESC
  * character, followed by a single byte indicating the track number,
  * followed by an arbitrary amount of track data. The end of
@@ -294,7 +294,7 @@ msr_flash_led (int fd, uint8_t led)
  * truncated. (That is, if there are 100 bytes of data, but the
  * buffer is only 50 bytes long, only the first 50 bytes will be
  * returned.) If the length <len> is larger than the actual amount
- * of track data, <len> will be adjusted to relfect the actual
+ * of track data, <len> will be adjusted to reflect the actual
  * number of bytes read.
  *
  * This function will fail if the serial port is not initialized
@@ -357,7 +357,7 @@ gettrack_iso (int fd, int t, uint8_t * buf, uint8_t * len)
  *
  * This is a helper function used by msr_raw_read() to read a
  * single track in response to a RAW track read command. The routine
- * reads trach <t> into buffer <buf> of length <len>, via file
+ * reads track <t> into buffer <buf> of length <len>, via file
  * descriptor <fd>. It is similar to the gettrack_iso() routine
  * above, except that the track delimiter format is a little different.
  * The track data should be prefixed by an ESC character, followed by a
@@ -373,7 +373,7 @@ gettrack_iso (int fd, int t, uint8_t * buf, uint8_t * len)
  * truncated. (That is, if there are 100 bytes of data, but the
  * buffer is only 50 bytes long, only the first 50 bytes will be
  * returned.) If the length <len> is larger than the actual amount
- * of track data, <len> will be adjusted to relfect the actual
+ * of track data, <len> will be adjusted to reflect the actual
  * number of bytes read.
  *
  * This function will fail if the serial port is not initialized
@@ -439,7 +439,7 @@ gettrack_raw (int fd, int t, uint8_t * buf, uint8_t * len)
  * return the MSR_STS_SENSOR_OK status code.
  */
 
-int 
+int
 msr_sensor_test (int fd)
 {
 	uint8_t b[4];
@@ -859,7 +859,7 @@ msr_init(int fd)
  * inch configuration for track 2. (This command has no effect for
  * other tracks.) It is assumed that this command only has meaning
  * when writing data. The MSR206 supports writing data on track 2
- * with <bpi> values varying from 75 to 210 bits per inch.
+ * with <bpi> values. Valid options are either 75 or 210 bits per inch.
  *
  * This function will fail if the serial port is not initialized
  * or the descriptor <fd> is invalid, or if the MSR_STS_OK status
@@ -890,7 +890,7 @@ msr_set_bpi (int fd, uint8_t bpi)
  * configuration for all 3 tracks. (This command has no effect for
  * other tracks.) It is assumed that this command only has meaning
  * when using ISO read or write commands. The MSR206 supports writing
- * data with <bpc> values from 5 to 7.
+ * data with <bpc> values from 5 to 8.
  *
  * This function will fail if the serial port is not initialized
  * or the descriptor <fd> is invalid, or if the MSR_STS_OK status
