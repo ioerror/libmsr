@@ -6,6 +6,7 @@
 /* Please see the README.MAKStripe file for more information. */
 
 #define MAK_ESC 'A'
+#define MAK_FIRMWARE_QUERY '?'
 
 /* Populate the buffer in the MAKStripe from the reader head. */
 /* Returns populated data from the buffer in the MAKStripe to the host computer. */
