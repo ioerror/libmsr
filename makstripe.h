@@ -5,6 +5,8 @@
 /* by all subsequent reads. */
 /* Please see the README.MAKStripe file for more information. */
 
+#define MAK_ESC 'A'
+
 /* Populate the buffer in the MAKStripe from the reader head. */
 /* Returns populated data from the buffer in the MAKStripe to the host computer. */
 #define MAKSTRIPE_READ 0x52 /* Single hex byte for ascii letter 'R' */
