@@ -1,0 +1,22 @@
+We're attempting to reverse engineer the interface for the MAKStripe. It does
+not include specifications and the manufacturer has not returned our emails.
+
+This is the output of `dmesg` on Debian Gnu/Linux for the MAKStripe USB device:
+[516281.960098] usb 5-2: new full speed USB device using uhci_hcd and address 8
+[516282.121155] usb 5-2: New USB device found, idVendor=10c4, idProduct=ea60
+[516282.121158] usb 5-2: New USB device strings: Mfr=1, Product=2, SerialNumber=3
+[516282.121160] usb 5-2: Product: CP2102 USB to UART Bridge Controller
+[516282.121161] usb 5-2: Manufacturer: Silicon Labs
+[516282.121163] usb 5-2: SerialNumber: 0001
+[516282.121240] usb 5-2: configuration #1 chosen from 1 choice
+[516282.127185] cp2101 5-2:1.0: cp2101 converter detected
+[516282.240090] usb 5-2: reset full speed USB device using uhci_hcd and address 8
+[516282.446301] usb 5-2: cp2101 converter now attached to ttyUSB0
+
+This is the output of `lsusb` on the same system:
+Bus 005 Device 007: ID 10c4:ea60 Cygnal Integrated Products, Inc. CP210x Composite Device
+
+Please see the makstripe.h for the current list of known magic bytes and their
+possible meanings.
+
+This is an ongoing effort, if you would like to help, please email us!

@@ -3,6 +3,7 @@
 /* The device may have as many as 20 possible card read buffers internally? */
 /* We have confirmed only a single read buffer; it appears to be clobbered */
 /* by all subsequent reads. */
+/* Please see the README.MAKStripe file for more information. */
 
 /* Populate the buffer in the MAKStripe from the reader head. */
 /* Returns populated data from the buffer in the MAKStripe to the host computer. */
