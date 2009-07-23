@@ -38,7 +38,7 @@ int
 mak_write(int fd)
 {
 	int w;
-	w = mak_cmd(fd, MAKSTRIPE_WRITE);
+	w = mak_cmd(fd, MAKSTRIPE_WRITE_BUF);
 	return w;
 }
 

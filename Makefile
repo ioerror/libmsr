@@ -4,7 +4,7 @@ CFLAGS=	-Wall -g -ansi -pedantic
 LDFLAGS= -L. -lmsr
 
 LIB=	libmsr.a
-LIBSRCS=	libmsr.c serialio.c msr206.c
+LIBSRCS=	libmsr.c serialio.c msr206.c makstripe.c
 LIBOBJS=	$(LIBSRCS:.c=.o)
 
 SUBDIRS=utils
