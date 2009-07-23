@@ -1,0 +1,5 @@
+libmsr needs to have an on disk or in database card format.
+It needs to handle raw data as well as common encoding formats (such as the
+common ISO format).
+
+Suggestions welcome.
