@@ -19,4 +19,9 @@ Bus 005 Device 007: ID 10c4:ea60 Cygnal Integrated Products, Inc. CP210x Composi
 Please see the makstripe.h for the current list of known magic bytes and their
 possible meanings.
 
+To gather further codes, it is helpful to sniff the USB bus. This process is
+outlined in the following url:
+
+	http://biot.com/blog/usb-sniffing-on-linux
+
 This is an ongoing effort, if you would like to help, please email us!
