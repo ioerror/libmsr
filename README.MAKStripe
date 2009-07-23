@@ -25,3 +25,155 @@ outlined in the following url:
 	http://biot.com/blog/usb-sniffing-on-linux
 
 This is an ongoing effort, if you would like to help, please email us!
+
+Here are some additional sniffed commands to decode:
+
+FORMAT command with a duration of 66 seconds with track 1 slected:
+f688cbc0 1279518494 S Bo:5:009:1 -115 4 = 46011064
+f688cbc0 1279519708 C Bo:5:009:1 0 4 >
+f688cc40 1279521706 C Bi:5:009:1 0 3 = 464d20
+f688cc40 1279521711 S Bi:5:009:1 -115 64 <
+
+f688cc40 1282019739 C Bi:5:009:1 0 5 = 464d3d4f 4b
+f688cc40 1282019748 S Bi:5:009:1 -115 64 <
+
+FORMAT command with a duration of 1 second with track 1 selected:
+f688cbc0 1308562309 S Bo:5:009:1 -115 4 = 46010864
+f688cbc0 1308563713 C Bo:5:009:1 0 4 >
+f688cc40 1308565710 C Bi:5:009:1 0 3 = 464d20
+f688cc40 1308565716 S Bi:5:009:1 -115 64 <
+
+f688cc40 1309815755 C Bi:5:009:1 0 5 = 464d3d4f 4b
+f688cc40 1309815763 S Bi:5:009:1 -115 64 <
+
+FORMAT command with a duration of 66 seconds with tracks 1 and 2 selected:
+
+f688cbc0 542770565 S Bo:5:009:1 -115 4 = 46031064
+f688cbc0 542771652 C Bo:5:009:1 0 4 >
+f688cc40 542773612 C Bi:5:009:1 0 3 = 464d20
+f688cc40 542773618 S Bi:5:009:1 -115 64 <
+
+f688cc40 545271654 C Bi:5:009:1 0 5 = 464d3d4f 4b
+f688cc40 545271664 S Bi:5:009:1 -115 64 <
+
+FORMAT command with a duration of 66 seconds with track 2 selected:
+
+f688cbc0 2641417750 S Bo:5:009:1 -115 4 = 46040864
+f688cbc0 2641419665 C Bo:5:009:1 0 4 >
+f688cc40 2641421659 C Bi:5:009:1 0 3 = 464d20
+f688cc40 2641421664 S Bi:5:009:1 -115 64 <
+f688cc40 2642674676 C Bi:5:009:1 0 5 = 464d3d4f 4b
+f688cc40 2642674685 S Bi:5:009:1 -115 64 <
+
+FORMAT command with a duration of 1 seconds with all 3 tracks selected:
+
+f688cbc0 2684789444 S Bo:5:009:1 -115 4 = 46070864
+f688cbc0 2684790637 C Bo:5:009:1 0 4 >
+f688cc40 2684792635 C Bi:5:009:1 0 3 = 464d20
+f688cc40 2684792648 S Bi:5:009:1 -115 64 <
+
+f688cc40 2686043674 C Bi:5:009:1 0 5 = 464d3d4f 4b
+f688cc40 2686043685 S Bi:5:009:1 -115 64 <
+
+ERASE command with a duration of 1 second with track 1 selected:
+
+
+f688cbc0 2739132923 S Bo:5:009:1 -115 3 = 450101
+f688cbc0 2739134645 C Bo:5:009:1 0 3 >
+f688cc40 2739136642 C Bi:5:009:1 0 3 = 457220
+f688cc40 2739136650 S Bi:5:009:1 -115 64 <
+
+f688cc40 2740121681 C Bi:5:009:1 0 5 = 45723d4f 4b
+f688cc40 2740121690 S Bi:5:009:1 -115 64 <
+
+
+ERASE command with a duration of 1 second with track 2 selected:
+
+f688cbc0 2754253377 S Bo:5:009:1 -115 3 = 450201
+f688cbc0 2754254675 C Bo:5:009:1 0 3 >
+f688cc40 2754256672 C Bi:5:009:1 0 3 = 457220
+f688cc40 2754256676 S Bi:5:009:1 -115 64 <
+
+f688cc40 2755243693 C Bi:5:009:1 0 5 = 45723d4f 4b
+f688cc40 2755243702 S Bi:5:009:1 -115 64 <
+
+ERASE command with a duration of 1 second with track 3 selected:
+f688cbc0 2766170378 S Bo:5:009:1 -115 3 = 450401
+f688cbc0 2766171681 C Bo:5:009:1 0 3 >
+f688cc40 2766173673 C Bi:5:009:1 0 3 = 457220
+f688cc40 2766173677 S Bi:5:009:1 -115 64 <
+
+f688cc40 2767159693 C Bi:5:009:1 0 5 = 45723d4f 4b
+f688cc40 2767159708 S Bi:5:009:1 -115 64 <
+
+ERASE command with a duration of 1 second with all tracks selected:
+f688cbc0 2788144866 S Bo:5:009:1 -115 3 = 450701
+f688cbc0 2788146683 C Bo:5:009:1 0 3 >
+f688cc40 2788148648 C Bi:5:009:1 0 3 = 457220
+f688cc40 2788148655 S Bi:5:009:1 -115 64 <
+
+f688cc40 2789133694 C Bi:5:009:1 0 5 = 45723d4f 4b
+f688cc40 2789133703 S Bi:5:009:1 -115 64 <
+
+
+ERASE command with a duration of 1 second with all tracks selected (and autoformat enabled):
+
+
+f688cbc0 3091190022 S Bo:5:009:1 -115 3 = 450701
+f688cbc0 3091191690 C Bo:5:009:1 0 3 >
+f688cc40 3091193686 C Bi:5:009:1 0 3 = 457220
+f688cc40 3091193691 S Bi:5:009:1 -115 64 <
+
+f688cc40 3092178730 C Bi:5:009:1 0 5 = 45723d4f 4b
+f688cc40 3092178741 S Bi:5:009:1 -115 64 <
+
+
+eRase command with a duration of 1 second with all tracks selected(and autoformat enabled):
+
+f688cbc0 3119908178 S Bo:5:009:1 -115 3 = 650701
+f688cbc0 3119909692 C Bo:5:009:1 0 3 >
+f688cc40 3119911690 C Bi:5:009:1 0 3 = 655220
+f688cc40 3119911695 S Bi:5:009:1 -115 64 <
+
+f688cc40 3120898732 C Bi:5:009:1 0 5 = 65523d4f 4b
+f688cc40 3120898743 S Bi:5:009:1 -115 64 <
+
+eRase command with a duration of 1 second with all tracks selected (no autoformat):
+f688cbc0 3134793352 S Bo:5:009:1 -115 3 = 650701
+f688cbc0 3134794729 C Bo:5:009:1 0 3 >
+f688cc40 3134796723 C Bi:5:009:1 0 3 = 655220
+f688cc40 3134796728 S Bi:5:009:1 -115 64 <
+
+f688cc40 3135782735 C Bi:5:009:1 0 5 = 65523d4f 4b
+f688cc40 3135782746 S Bi:5:009:1 -115 64 <
+eRase command with a duration of 1 second with track 1 selected:
+
+f688cbc0 3164304323 S Bo:5:009:1 -115 3 = 650101
+f688cbc0 3164305703 C Bo:5:009:1 0 3 >
+f688cc40 3164307724 C Bi:5:009:1 0 3 = 655220
+f688cc40 3164307729 S Bi:5:009:1 -115 64 <
+
+f688cc40 3165294747 C Bi:5:009:1 0 5 = 65523d4f 4b
+f688cc40 3165294758 S Bi:5:009:1 -115 64 <
+
+eRase command with a duration of 1 second with track 2 selected:
+
+f688cbc0 3177879807 S Bo:5:009:1 -115 3 = 650201
+f688cbc0 3177881700 C Bo:5:009:1 0 3 >
+f688cc40 3177883728 C Bi:5:009:1 0 3 = 655220
+f688cc40 3177883735 S Bi:5:009:1 -115 64 <
+
+f688cc40 3178870739 C Bi:5:009:1 0 5 = 65523d4f 4b
+f688cc40 3178870748 S Bi:5:009:1 -115 64 <
+
+eRase command with a duration of 1 second with track 3 selected:
+
+f688cbc0 3193333809 S Bo:5:009:1 -115 3 = 650401
+f688cbc0 3193335734 C Bo:5:009:1 0 3 >
+f688cc40 3193337700 C Bi:5:009:1 0 3 = 655220
+f688cc40 3193337707 S Bi:5:009:1 -115 64 <
+
+f688cc40 3194324742 C Bi:5:009:1 0 5 = 65523d4f 4b
+f688cc40 3194324751 S Bi:5:009:1 -115 64 <
+
+
