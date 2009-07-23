@@ -7,5 +7,8 @@ It may also support the following models:
 
 	MSR406
 
+Currently progress is being made to reverse engineer the interface for the
+USB MAKStripe.
+
 Future support will likely be added for hardware with open specifications.
 If you would like to see support for your hardware, contact us.
