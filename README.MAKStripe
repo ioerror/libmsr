@@ -26,7 +26,14 @@ outlined in the following url:
 
 This is an ongoing effort, if you would like to help, please email us!
 
-Here are some additional sniffed commands to decode:
+To sniff the USB bus with the above configuration (USB bus device 5, etc):
+
+	mount -t debugfs none_debugs /sys/kernel/debug
+	modprobe usbmon
+	cat /sys/kernel/debug/usbmon/5u > /tmp/MAKStripe-capture-000
+
+Here are some additional sniffed commands captured with that method that need
+decoding:
 
 FORMAT command with a duration of 66 seconds with track 1 slected:
 f688cbc0 1279518494 S Bo:5:009:1 -115 4 = 46011064
