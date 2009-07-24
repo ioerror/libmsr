@@ -60,6 +60,7 @@
 
 /* These are the magic bytes for the Erase command */
 /* These are the low flux bit erase commands */
+/* "Erase selected tracks in FLUX 0 direction." */
 #define MAKSTRIPE_ErASE_CMD	"E"
 #define MAKSTRIPE_ErASE_RESP	"Er "
 #define MAKSTRIPE_ErASE_OK	"Er=OK"
@@ -74,6 +75,7 @@
 
 /* These are the magic bytes for the eRase command */
 /* These are the high flux bit erase commands */
+/* "Erase selected tracks in FLUX 1 direction." */
 #define MAKSTRIPE_eRASE_CMD	"e"
 #define MAKSTRIPE_eRASE_RESP	"eR "
 #define MAKSTRIPE_eRASE_OK	"eR=OK"
