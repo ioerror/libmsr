@@ -5,7 +5,18 @@
 /* by all subsequent reads. */
 /* Please see the README.MAKStripe file for more information. */
 
+
+/* This is the byte sent before all other commands. */
 #define MAK_ESC 'A'
+
+/* This command is possibly a command that resets the MAKStripe. */
+/* It appears that after sending this command, the device prints some data. */
+/* At first, we thought that this might be the firmware query command. */
+/* However, it appears that this is used to cancel operations in progress */
+/* additionally, it's used at other times. */
+/* It is likely an unintended consequence that this produces a firmware */
+/* version string. It probably does this because this command resets the */
+/* device and it prints a boot loader or something to its serial port. */
 #define MAK_FIRMWARE_QUERY_CMD '?'
 
 /* Populate the buffer in the MAKStripe from the reader head. */
