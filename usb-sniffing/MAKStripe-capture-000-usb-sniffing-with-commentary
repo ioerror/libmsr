@@ -1,6 +1,16 @@
-
-
+Byte decoding and protocol commentary with your host ioerror follows the '#'
 This is T=0 and we'll now start the MAKStripe software:
+
+A basic explaination for the conventions of the USB dump:
+'Co' = Control output
+'Ci' = Control input
+'Bo' = Bulk output
+'Bi' = Bulk input
+
+A full explaination is here:
+http://lxr.linux.no/linux+v2.6.28.8/Documentation/usb/usbmon.txt
+
+Arm yourself with the contents of `man ascii` and begin!
 
 f688cdc0 3722032316 S Co:5:009:0 s 41 00 0001 0000 0000 0
 f688cdc0 3722033633 C Co:5:009:0 0 0
