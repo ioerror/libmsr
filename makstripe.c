@@ -32,30 +32,18 @@ int mak_reset(int fd)
 {
 	int r;
 	int i;
-	char buf[strlen(MAK_RESET_RESP)];
+	char buf[strlen(MAK_RESET_RESP) + 1];
 	memset(buf, 0, strlen(MAK_RESET_RESP));
-	/* We're expecting something like: MSUSB CI.270209 */
-	/*
-	f64f3740 177877074 S Bi:5:017:1 -115 64 <
-	f64f3740 177878048 S Bi:5:017:1 -115 64 <
-	f688ce40 177882078 S Bo:5:017:1 -115 1 = 3f
-	f688ce40 177883039 C Bo:5:017:1 0 1 >
-	f64f3740 177887027 C Bi:5:017:1 0 15 = 4d535553 42204349 2e323730 323039
-	f64f3740 177887039 S Bi:5:017:1 -115 64 <
-	f64f3740 185363008 C Bi:5:017:1 -2 0
-	*/
+	buf[0] = MAK_RESET_CMD;
 	printf("Sending reset command: %c\n", MAK_RESET_CMD);
-	serial_write(fd,MAK_RESET_CMD, sizeof(MAK_RESET_CMD));
-
+	serial_write(fd, buf, sizeof(MAK_RESET_CMD));
 	printf("We expect: %s\n", MAK_RESET_RESP);
-	printf("We get...:\n");
-	for (i = 0; i < 10; i++) {
-		serial_read(fd, buf, 2);
-		printf("%02x %02x \n", buf[0], buf[1]);
-	}
-
-	printf("Reset status: %d", r);
-	return 0;
+	printf("We got ");
+	r = serial_read(fd, buf, strlen(MAK_RESET_RESP));
+	buf[strlen(MAK_RESET_RESP)] = '\0';
+	printf("buf: %s\n", buf);
+	printf("Reset status: %d\n", r);
+	return r;
 }
 
 int
