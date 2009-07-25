@@ -72,7 +72,7 @@ typedef struct mak_cmd_erase {
 /* device and it prints a boot loader or something to its serial port. */
 #define MAK_FIRMWARE_QUERY_CMD '?' /* ?<MAK_ESC>*/
 /* The response is the firmware information. XXX TODO: Don't hardcode... */
-#define MAK_FIRMWARE_QUERY_RESP "MSUSB CI.270209?"
+#define MAK_FIRMWARE_QUERY_RESP "MSUSB CI.270209"
 #define MAK_FIRMWARE_QUERY_STS_OK /* UNKNOWN */
 #define MAK_FIRMWARE_QUERY_STS_ERR /* UNKNOWN */
 
