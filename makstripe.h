@@ -59,6 +59,9 @@ typedef struct mak_cmd_erase {
 /* This is the byte sent as the suffix for all commands. */
 #define MAK_ESC 0x04 /* The bits formerly known as <EOT> */
 
+/* This is our desired baud rate */
+#define MAK_BAUD 38400
+
 /* This command is possibly a command that resets the MAKStripe. */
 /* It appears that after sending this command, the device prints some data. */
 /* At first, we thought that this might be the firmware query command. */
@@ -68,14 +71,18 @@ typedef struct mak_cmd_erase {
 /* version string. It probably does this because this command resets the */
 /* device and it prints a boot loader or something to its serial port. */
 #define MAK_FIRMWARE_QUERY_CMD '?' /* ?<MAK_ESC>*/
-#define MAK_FIRMWARE_QUERY_RESP /* The response is the firmware information. */
+/* The response is the firmware information. XXX TODO: Don't hardcode... */
+#define MAK_FIRMWARE_QUERY_RESP "MSUSB CI.270209?"
 #define MAK_FIRMWARE_QUERY_STS_OK /* UNKNOWN */
 #define MAK_FIRMWARE_QUERY_STS_ERR /* UNKNOWN */
+
+#define MAK_RESET_CMD '?'
+#define MAK_RESET_RESP MAK_FIRMWARE_QUERY_RESP
 
 /* Populate the buffer in the MAKStripe from the reader head. */
 /* Returns populated data from the buffer in the MAKStripe to the host computer. */
 #define MAKSTRIPE_READ_CMD 'R' /* R<MAK_ESC> */
-#define MAKSTRIPE_READ_RESP "Ready" /* Sing it: "One of these things is not like the others..." */
+#define MAKSTRIPE_READ_RESP "Ready " /* Sing it: "One of these things is not like the others..." */
 /* Swipe a card here and wait for data. */
 /* Sample data follows and ends with the status response. */
 /* Sample data format is as follows: 'RD '<16bits of length data><data samples> */
