@@ -36,9 +36,9 @@ Startup completed.
 
 Lets scan for cards now:
 
-f688cbc0 3746063312 S Bo:5:009:1 -115 2 = 5207
+f688cbc0 3746063312 S Bo:5:009:1 -115 2 = 5207 # 2 bytes were sent by us: 'R<BEL>'
 f688cbc0 3746064593 C Bo:5:009:1 0 2 >
-f688cc40 3746066618 C Bi:5:009:1 0 5 = 52656164 79
+f688cc40 3746066618 C Bi:5:009:1 0 5 = 52656164 79 # 5 bytes were sent back: 'Ready'
 f688cc40 3746066624 S Bi:5:009:1 -115 64 <
 
 The device is now waiting for a stripe to pass through the MAKStripe.
