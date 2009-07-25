@@ -6,11 +6,23 @@
 /* Please see the README.MAKStripe file for more information. */
 
 /* This is the basic way to send a command */
+/* This appears to be the way that R/W/S/C operate. */
 typedef struct mak_cmd {
 	uint8_t	mak_cmd;
-	uint8_t	mak_esc;
-	uint16_t	mak_payload; /* This is needed for a few corner cases. */
-} mak_cmd_t;
+	uint8_t	mak_track_mask;
+} mak_generic_cmd_t;
+
+typedef struct mak_cmd_load_buf {
+	uint8_t	mak_cmd;
+	uint16_t	mak_len;
+} mak_load_buf_t;
+
+/* This is for the erase/eRase commands. */
+typedef struct mak_cmd_erase {
+	uint8_t	mak_cmd;
+	uint8_t	mak_track_mask;
+	uint8_t	mak_wtf;
+} mak_cmd_erase_t;
 
 /* This is the byte sent as the suffix for all commands. */
 #define MAK_ESC '0x04' /* The bits formerly known as <EOT> */
