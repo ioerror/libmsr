@@ -5,9 +5,15 @@
 /* by all subsequent reads. */
 /* Please see the README.MAKStripe file for more information. */
 
+/* This is the basic way to send a command */
+typedef struct mak_cmd {
+	uint8_t	mak_cmd;
+	uint8_t	mak_esc;
+	uint16_t	mak_payload; /* This is needed for a few corner cases. */
+} mak_cmd_t;
 
-/* This is the byte sent before all other commands. */
-#define MAK_ESC 'A'
+/* This is the byte sent as the suffix for all commands. */
+#define MAK_ESC '0x07' /* The bits formerly known as <BEL> */
 
 /* This command is possibly a command that resets the MAKStripe. */
 /* It appears that after sending this command, the device prints some data. */
@@ -17,12 +23,15 @@
 /* It is likely an unintended consequence that this produces a firmware */
 /* version string. It probably does this because this command resets the */
 /* device and it prints a boot loader or something to its serial port. */
-#define MAK_FIRMWARE_QUERY_CMD '?'
+#define MAK_FIRMWARE_QUERY_CMD '?' /* ?<BEL>*/
+#define MAK_FIRMWARE_QUERY_RESP /* The response is the firmware information. */
+#define MAK_FIRMWARE_QUERY_STS_OK /* UNKNOWN */
+#define MAK_FIRMWARE_QUERY_STS_ERR /* UNKNOWN */
 
 /* Populate the buffer in the MAKStripe from the reader head. */
 /* Returns populated data from the buffer in the MAKStripe to the host computer. */
-#define MAKSTRIPE_READ_CMD "R" /* 0x52 */
-#define MAKSTRIPE_READ_RESP "Ready"
+#define MAKSTRIPE_READ_CMD "R" /* R<BEL> */
+#define MAKSTRIPE_READ_RESP "Ready" /* Sing it: "One of these things is not like the others..." */
 /* Swipe a card here and wait for data. */
 /* Sample data follows and ends with the status response. */
 #define MAKSTRIPE_READ_STS_OK "RD=OK"
@@ -30,14 +39,20 @@
 
 /* Populate the buffer in the MAKStripe from the host computer. */
 /* Data is packed in an unknown format as of yet. */
-#define MAKSTRIPE_POPULATE_BUF_CMD 'X' /* X<num of bytes><0x7> */
+#define MAKSTRIPE_POPULATE_BUF_CMD 'X' /* X<num of bytes><BEL> */
 #define MAKSTRIPE_POPULATE_BUF_RESP "WB " /* Acknowledge that MAKStripe is ready for data. */
 /* Now write out bytes to <fd> */
 #define MAKSTRIPE_POPULATE_BUF_OK "WB=OK" /* Literal "WB=OK" */
 #define MAKSTRIPE_POPULATE_BUF_ERR /* UNKNOWN */
 
+/* Show what's in the device buffer. */
+#define MAKSTRIPE_SHOW_BUFFER_CMD 'S' /*S<BEL>*/
+#define MAKSTRIPE_SHOW_BUFFER_RESP /* The response is the buffered data. */
+#define MAKSTRIPE_SHOW_BUFFER_STS_OK "RB=1 OK"
+#define MAKSTRIPE_SHOW_BUFFER_STS_ERR /* UNKNOWN */
+
 /* Undefined as of yet but appears to be a valid command byte. */
-#define MAKSTRIPE_WRITE_BUF_CMD "W" /* 0x58 */
+#define MAKSTRIPE_WRITE_BUF_CMD "W" /* W<BEL> */
 #define MAKSTRIPE_WRITE_BUF_RESP /* UNKNOWN */
 #define MAKSTRIPE_WRITE_BUF_STS_OK "WB "
 #define MAKSTRIPE_WRITE_BUF_STS_ERR /* UNKNOWN */
@@ -46,7 +61,7 @@
 /* It appears to buffer the reference card in the device and then write it */
 /* to the next. MAKSTRIPE_CLONE esentially copies the buffer onto the card. */
 /* Cloning steps: Issue MAKSTRIPE_READ and follow it with MAKSTRIPE_CLONE */
-#define MAKSTRIPE_CLONE_CMD "C" /* 0x43 */
+#define MAKSTRIPE_CLONE_CMD "C" /* W<BEL> */
 #define MAKSTRIPE_CLONE_RESP "CP "
 #define MAKSTRIPE_CLONE_STS_OK "CP=OK" /* Really pedobear? Party van is on the way! */
 #define MAKSTRIPE_CLONE_STS_ERR /* UNKNOWN */
@@ -57,7 +72,7 @@
 #define MAKSTRIPE_TK3	0x04
 
 /* These are the magic bytes for the format command */
-#define MAKSTRIPE_FMT_CMD	"F" /* Eg: MAKSTRIPE_FMT_CMDMAKSTRIPE_FMT_TK1 */
+#define MAKSTRIPE_FMT_CMD	"F" /* F<MAKSTRIPE_FMT_TK1><BEL> */
 #define MAKSTRIPE_FMT_RESP	"FM "
 #define MAKSTRIPE_FMT_OK	"FM=OK"
 #define MAKSTRIPE_FMT_ERR	/* UNKNOWN */
@@ -72,7 +87,7 @@
 /* These are the magic bytes for the Erase command */
 /* These are the low flux bit erase commands */
 /* "Erase selected tracks in FLUX 0 direction." */
-#define MAKSTRIPE_ErASE_CMD	"E"
+#define MAKSTRIPE_ErASE_CMD	"E" /* E<MAKSTRIPE_FMT_TK1><BEL> XXX: Confirm with usb dump */
 #define MAKSTRIPE_ErASE_RESP	"Er "
 #define MAKSTRIPE_ErASE_OK	"Er=OK"
 #define MAKSTRIPE_ErASE_ERR	/* UNKNOWN */
@@ -87,7 +102,7 @@
 /* These are the magic bytes for the eRase command */
 /* These are the high flux bit erase commands */
 /* "Erase selected tracks in FLUX 1 direction." */
-#define MAKSTRIPE_eRASE_CMD	"e"
+#define MAKSTRIPE_eRASE_CMD	"e" /* e<MAKSTRIPE_FMT_TK1><BEL> XXX: Confirm with usb dump */
 #define MAKSTRIPE_eRASE_RESP	"eR "
 #define MAKSTRIPE_eRASE_OK	"eR=OK"
 #define MAKSTRIPE_eRASE_ERR	/* UNKNOWN */
