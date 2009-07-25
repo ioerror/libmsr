@@ -46,6 +46,7 @@ int main(int argc, char * argv[])
 	ret = mak_read(fd, MAKSTRIPE_TK_ALL);
 	if (ret != 0)
 		exit(ret);
+	usleep(1000);
 	printf("Ready to clone buffer onto blank card...\n");
 	ret = mak_clone(fd);
 	if (ret != 0)
