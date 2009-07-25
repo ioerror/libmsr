@@ -12,11 +12,16 @@
 #include <err.h>
 #include <string.h>
 
+/* I can't believe that I'm so lazy */
+#include <arpa/inet.h>
+
+
 #include "libmsr.h"
 #include "serialio.h"
 #include "makstripe.h"
 
 /* Remember that the MAKStripe desires MAK_BAUD for serial io. */
+/* It also requires MAK_BLOCK which we haven't defined. */
 
 int
 mak_cmd(int fd, uint8_t c, uint8_t tracks)
@@ -52,8 +57,9 @@ mak_read(int fd, uint8_t tracks)
 	int r;
 	int i;
 	char buf[5];
-	char sample_tmp[2];
+	unsigned char sample_tmp[2];
 	uint16_t sample_count;
+	int sample_count_guessing;
 	printf("Attempting to perform a read...\n");
 
 	r = mak_cmd(fd, MAKSTRIPE_READ_CMD, tracks);
@@ -81,19 +87,22 @@ mak_read(int fd, uint8_t tracks)
 	}
 	serial_read(fd, &sample_count, 2);
 	printf("Sample count appears to be: %d\n", sample_count);
+	sample_count_guessing = ntohs(sample_count);
+	printf("Sample count appears to be: %d\n", sample_count_guessing);
 
 	/* XXX: We currently clobber the data. We don't return it. */
-	for (i = 0; i < sample_count; i++) {
+	for (i = 0; i < sample_count_guessing ; i++) { /* Why is this off? sleeppppy... */
 		printf("%d %02x %02x\n", i, sample_tmp[0], sample_tmp[1]);
 		serial_read(fd, sample_tmp, 2);
 	}
 
-	printf("In theory, we have dumped the full sample data now...");
+	printf("In theory, we have dumped the full sample data now...\n");
 	/* Lets ensure that the sample read went correctly! */
 	serial_read(fd, buf, 5);
 	printf("Sample read returned status: %s\n", buf);
 
-	if (!memcmp(buf, MAKSTRIPE_READ_STS_OK, sizeof(MAKSTRIPE_READ_STS_OK)))
+	r = memcmp(buf, MAKSTRIPE_READ_STS_OK, 5);
+	if (r != 0)
 		return -1;
 
 	return r;
