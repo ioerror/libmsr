@@ -134,17 +134,20 @@ int
 mak_clone(int fd)
 {
 	int c;
-	char buf[5];
+	char buf[strlen(MAKSTRIPE_CLONE_RESP)];
 
-	c = mak_cmd(fd, MAKSTRIPE_CLONE_CMD, 0);
+	c = serial_write(fd, MAKSTRIPE_CLONE_CMD, 1);
+	printf("Serial write status: %i\n", c);
 
+/*
 	if (c != 0) {
 		printf("Clone command failure.\n");
 		return -1;
 	}
+*/
 
 	/* Read the response and make sure it matches MAKSTRIPE_CLONE_RESP */
-	serial_read(fd, buf, sizeof(MAKSTRIPE_CLONE_RESP));
+	serial_read(fd, buf, strlen(MAKSTRIPE_CLONE_RESP));
 	if (!memcmp(buf, MAKSTRIPE_CLONE_RESP, sizeof(MAKSTRIPE_CLONE_RESP)))
 		return -1;
 
@@ -152,9 +155,10 @@ mak_clone(int fd)
 	printf("Please swipe blank card\n");
 
 	/* Read the response and make sure it matches MAKSTRIPE_CLONE_STS_OK */
-	serial_read(fd, buf, sizeof(MAKSTRIPE_CLONE_STS_OK));
-	if (!memcmp(buf, MAKSTRIPE_CLONE_STS_OK, sizeof(MAKSTRIPE_CLONE_STS_OK)))
+	serial_read(fd, buf, strlen(MAKSTRIPE_CLONE_STS_OK));
+	if (!memcmp(buf, MAKSTRIPE_CLONE_STS_OK, sizeof(MAKSTRIPE_CLONE_STS_OK))) {
 		return -1;
+	}
 
 	printf("Clone succesfull.\n");
 	return c;
