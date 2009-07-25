@@ -17,6 +17,7 @@ int main(int argc, char * argv[])
 {
 	int fd = -1;
 	int serial;
+	int ret;
 
 	/* Default device selection per platform */
 #ifdef __linux__
@@ -37,11 +38,19 @@ int main(int argc, char * argv[])
 		exit(1);
 	}
 
-	/* The MAKStripe doesn't appear to need a reset at start up. */
-	printf ("Attempting to clone card.\n");
-	mak_clone(fd);
+	printf("Resetting MAKStripe...\n");
+	ret = mak_reset(fd);
+	if (ret != 0)
+		exit(ret);
+	printf("Ready to populate MAKStripe buffer...\n");
+	ret = mak_read(fd, MAKSTRIPE_TK_ALL);
+	if (ret != 0)
+		exit(ret);
+	printf("Ready to clone buffer onto blank card...\n");
+	ret = mak_clone(fd);
+	if (ret != 0)
+		exit(ret);
 
-	/* We're finished */
 	serial_close (fd);
-	exit(0);
+	exit(ret);
 }
