@@ -135,8 +135,10 @@ mak_clone(int fd)
 {
 	int c;
 	char buf[strlen(MAKSTRIPE_CLONE_RESP)];
-
-	c = serial_write(fd, MAKSTRIPE_CLONE_CMD, 1);
+	char buf[2];
+	buf[0] = MAKSTRIPE_CLONE_CMD;
+	buf[1] = 0x7;
+	c = serial_write(fd, buf, 2);
 	printf("Serial write status: %i\n", c);
 
 /*
