@@ -5,6 +5,38 @@
 /* by all subsequent reads. */
 /* Please see the README.MAKStripe file for more information. */
 
+/*
+ * Read (populate buffer from card, and show us the data):
+ * Send: R<0x7>
+ * Response: Ready
+ * <swipe card>
+ * Response: RD<0xXX><0xYY><0x20><data>RD=OK
+ */
+
+/*
+ * Populate buffer from host:
+ * Send: X<number of bytes><0x7>
+ * Response: WB<space>
+ * Send: data samples
+ * Response: WB=OK
+ */
+
+/*
+ * Populate buffer from card (read, but don't show us the data)
+ * Send: W
+ * Response: RA
+ * <swipe card>
+ * Response: RA=OK
+ */
+
+/*
+ * Copy buffer (copy data to card card)
+ * Send: C<0x7>
+ * Response: CP<space>
+ * <swipe card>
+ * Response: CP=OK
+ */
+
 /* This is the basic way to send a command */
 /* This appears to be the way that R/W/S/C operate. */
 typedef struct mak_cmd {
@@ -83,8 +115,14 @@ typedef struct mak_cmd_erase {
 #define MAKSTRIPE_TK2	0x02
 #define MAKSTRIPE_TK3	0x04
 
-/* These are the magic bytes for the format command */
-#define MAKSTRIPE_FMT_CMD	"F" /* F<MAKSTRIPE_FMT_TK1><MAK_ESC> */
+/*
+ * These are the magic bytes for the format command */
+ * The format command seems to be an 'F' followed by a single byte
+ * track mask, followed by " d" (space, lower case d). It's unclear
+ * what the " d" means.
+ */
+
+#define MAKSTRIPE_FMT_CMD	"F" /* F<MAKSTRIPE_FMT_TK1>" d" */
 #define MAKSTRIPE_FMT_RESP	"FM "
 #define MAKSTRIPE_FMT_OK	"FM=OK"
 #define MAKSTRIPE_FMT_ERR	/* UNKNOWN */
