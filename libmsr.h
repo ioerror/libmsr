@@ -7,6 +7,8 @@
 
 #define MSR_MAX_TRACK_LEN 255
 #define MSR_MAX_TRACKS 3
+#define MSR_BLOCKING O_NONBLOCK
+#define MSR_BAUD B9600
 
 typedef struct msr_track {
 	uint8_t		msr_tk_data[MSR_MAX_TRACK_LEN];
