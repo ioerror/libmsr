@@ -1,3 +1,6 @@
+/* Everyone must include libmsr.h or they're doing it wrong! */
+#include <sys/stat.h>
+#include <fcntl.h>
 
 /*
  * Track lengths when doing raw accesses can be at most 256 byte
