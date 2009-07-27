@@ -30,7 +30,7 @@ int main(int argc, char * argv[])
 	else
 		printf ("no device specified, defaulting to %s\n", device);
 
-	serial = serial_open (device, &fd);
+	serial = serial_open (device, &fd, MSR_BLOCKING, MSR_BAUD);
 
 	if (serial == -1) {
 		err(1, "Serial open of %s failed", device);
