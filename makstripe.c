@@ -199,7 +199,7 @@ mak_successful_clone(int fd)
 {
 	int r;
 	do {
-		mak_clone(fd);
+		r = mak_clone(fd);
 	} while (r != 0);
 	return r;
 }
