@@ -102,8 +102,8 @@ mak_read(int fd, uint8_t tracks)
 
 	/* XXX: We currently clobber the data. We don't return it. */
 	for (i = 0; i < sample_count_guessing ; i++) { /* Why is this off? sleeppppy... */
-		printf("%d %02x %02x\n", i, sample_tmp[0], sample_tmp[1]);
 		serial_read(fd, sample_tmp, 2);
+		printf("%d %02x %02x\n", i, sample_tmp[0], sample_tmp[1]);
 	}
 
 	printf("In theory, we have dumped the full sample data now...\n");
