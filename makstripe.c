@@ -156,7 +156,7 @@ int
 mak_clone(int fd)
 {
 	int c;
-	char buf[strlen(MAKSTRIPE_CLONE_RESP)];
+	char buf[strlen(MAKSTRIPE_CLONE_STS_OK)];
 	buf[0] = MAKSTRIPE_CLONE_CMD;
 	buf[1] = 0x7;
 	c = serial_write(fd, buf, 2);
@@ -189,7 +189,7 @@ mak_clone(int fd)
 		return -1;
 	}
 
-	printf("Clone succesfull.\n");
+	printf("Clone succesfull: %i\n", c);
 	return c;
 }
 
