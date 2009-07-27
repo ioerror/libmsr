@@ -51,6 +51,16 @@ int mak_reset(int fd)
 	return r;
 }
 
+int mak_flush(fd)
+{
+	int r;
+	char buf[1];
+	do {
+		r = serial_read(fd, buf, 1);
+	} while (r != 0);
+	return r;
+}
+
 int
 mak_read(int fd, uint8_t tracks)
 {
@@ -108,6 +118,18 @@ mak_read(int fd, uint8_t tracks)
 	return r;
 }
 
+/* The MAKStripe is a bit of a pain and has failures reading often. Wrap it.*/
+int
+mak_successful_read(int fd, uint8_t tracks)
+{
+	int r;
+	do {
+		mak_reset(fd);
+		r = mak_read(fd, tracks);
+	} while (r != 0);
+	return r;
+}
+
 /*
 int
 mak_write(int fd)
@@ -148,19 +170,38 @@ mak_clone(int fd)
 */
 
 	/* Read the response and make sure it matches MAKSTRIPE_CLONE_RESP */
-	serial_read(fd, buf, strlen(MAKSTRIPE_CLONE_RESP));
-	if (!memcmp(buf, MAKSTRIPE_CLONE_RESP, sizeof(MAKSTRIPE_CLONE_RESP)))
+	c = serial_read(fd, buf, strlen(MAKSTRIPE_CLONE_RESP));
+	if (memcmp(buf, MAKSTRIPE_CLONE_RESP, strlen(MAKSTRIPE_CLONE_RESP)) != 0) {
+		printf("buf should be: %s\n", MAKSTRIPE_CLONE_RESP);
+		printf("%c%c%c%c%c\n", buf[0], buf[1], buf[2], buf[3], buf[4]);
+		printf("buf was unequal to MAKSTRIPE_CLONE_RESP.\n");
 		return -1;
-
+	}
 	printf("Ready to clone from Makstripe buffer to card.\n");
 	printf("Please swipe blank card\n");
 
 	/* Read the response and make sure it matches MAKSTRIPE_CLONE_STS_OK */
-	serial_read(fd, buf, strlen(MAKSTRIPE_CLONE_STS_OK));
-	if (!memcmp(buf, MAKSTRIPE_CLONE_STS_OK, sizeof(MAKSTRIPE_CLONE_STS_OK))) {
+	c = serial_read(fd, buf, strlen(MAKSTRIPE_CLONE_STS_OK));
+	if (memcmp(buf, MAKSTRIPE_CLONE_STS_OK, strlen(MAKSTRIPE_CLONE_STS_OK)) != 0) {
+		printf("We expect a string of length: %i\n", strlen(MAKSTRIPE_CLONE_STS_OK));
+		printf("buf was unequal to MAKSTRIPE_CLONE_STS_OK: %s\n", MAKSTRIPE_CLONE_STS_OK);
+		printf("%c%c%c%c%c\n", buf[0], buf[1], buf[2], buf[3], buf[4]);
 		return -1;
 	}
 
 	printf("Clone succesfull.\n");
 	return c;
 }
+
+/* The MAKStripe is a bit of a pain and has failures cloning often. Wrap it.*/
+int
+mak_successful_clone(int fd)
+{
+	int r;
+	do {
+		mak_clone(fd);
+	} while (r != 0);
+	return r;
+}
+
+

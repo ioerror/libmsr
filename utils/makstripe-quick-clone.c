@@ -40,18 +40,23 @@ int main(int argc, char * argv[])
 
 	printf("Resetting MAKStripe...\n");
 	ret = mak_reset(fd);
-	if (ret != 0)
+	if (ret != 0) {
+		printf("Unable to reset MAKStripe!\n");
 		exit(ret);
+	}
 	printf("Ready to populate MAKStripe buffer...\n");
-	ret = mak_read(fd, MAKSTRIPE_TK_ALL);
-	if (ret != 0)
+	ret = mak_successful_read(fd, MAKSTRIPE_TK_ALL);
+	if (ret != 0) {
+		printf("Unable to populate MAKStripe buffer!\n");
 		exit(ret);
+	}
 	usleep(1000);
 	printf("Ready to clone buffer onto blank card...\n");
-	ret = mak_clone(fd);
-	if (ret != 0)
+	ret = mak_successful_clone(fd);
+	if (ret != 0) {
+		printf("Unable to clone buffer onto blank card!\n");
 		exit(ret);
-
+	}
 	serial_close (fd);
 	exit(ret);
 }
