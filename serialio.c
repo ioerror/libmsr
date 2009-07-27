@@ -54,10 +54,19 @@ serial_read (int fd, void * buf, size_t len)
 
 	p = buf;
 
+#ifdef SERIAL_DEBUG
+	printf("[RX %.3d]", len);
+#endif
 	for (i = 0; i < len; i++) {
 		serial_readchar (fd, &b);
+#ifdef SERIAL_DEBUG
+		printf(" %.2x", b);
+#endif
 		p[i] = b;
 	}
+#ifdef SERIAL_DEBUG
+	printf("\n");
+#endif
 
 	return (0);
 }
@@ -75,8 +84,12 @@ serial_write (int fd, void * buf, size_t len)
  * interpreted as control characters and swallowed.
  */
 
+/* XXX TODO:
+This needs to be able to switch between blocking and non blocking IO.
+Additionally, we need to be able to configure the baud rate.
+*/
 static int
-serial_setup (int fd)
+serial_setup (int fd, speed_t baud)
 {
         struct termios	options;
 
@@ -85,9 +98,8 @@ serial_setup (int fd)
 		return (-1);
 
 	/* Set baud rate */
-
-	cfsetispeed(&options, B9600);
-	cfsetospeed(&options, B9600);
+	cfsetispeed(&options, baud);
+	cfsetospeed(&options, baud);
 
 	/* Control modes */
 
@@ -131,16 +143,16 @@ serial_setup (int fd)
 }
 
 int
-serial_open(char *path, int * fd)
+serial_open(char *path, int * fd, int blocking, speed_t baud)
 {
 	int		f;
 
-	f = open(path, O_RDWR | O_FSYNC);
+	f = open(path, blocking, O_RDWR | O_FSYNC);
 
 	if (f == -1)
 		return (-1);
 
-	if (serial_setup (f) != 0) {
+	if (serial_setup (f, baud) != 0) {
 		close (f);
 		return (-1);
 	}
