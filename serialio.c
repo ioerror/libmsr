@@ -143,7 +143,7 @@ serial_open(char *path, int * fd, int blocking, speed_t baud)
 {
 	int		f;
 
-	f = open(path, blocking, O_RDWR | O_FSYNC);
+	f = open(path, blocking | O_RDWR | O_FSYNC);
 
 	if (f == -1)
 		return (-1);
