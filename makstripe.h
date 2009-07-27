@@ -56,10 +56,11 @@ typedef struct mak_cmd_erase {
 	uint8_t	mak_wtf;
 } mak_cmd_erase_t;
 
-/* This is the byte sent as the suffix for all commands. */
+/* This is the byte sent as the suffix for many commands. */
 #define MAK_ESC 0x04 /* The bits formerly known as <EOT> */
 
-/* This is our desired baud rate */
+/* For proper serial setup. */
+#define MAK_BLOCKING O_NONBLOCK
 #define MAK_BAUD 38400
 
 /* This command is possibly a command that resets the MAKStripe. */
