@@ -13,3 +13,7 @@ Add support for the following hardware:
 Implement some kind of data analysis. Perhaps with Stripe Snoop?
 
 	http://stripesnoop.sourceforge.net/
+
+Implement emulators for the hardware we do support.
+
+	We should be able to operator libmsr on a named pipe!
