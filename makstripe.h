@@ -60,7 +60,8 @@ typedef struct mak_cmd_erase {
 #define MAK_ESC 0x04 /* The bits formerly known as <EOT> */
 
 /* For proper serial setup. */
-#define MAK_BLOCKING 0
+/* The MAKStripe requires blocking IO! You will facepalm! */
+#define MAK_BLOCKING O_NONBLOCK
 #define MAK_BAUD B38400
 
 /* This command is possibly a command that resets the MAKStripe. */
