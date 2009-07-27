@@ -14,7 +14,7 @@
  * Serial I/O routines.
  */
 
-static int serial_setup (int);
+static int serial_setup (int fd, speed_t baud);
 
 /*
  * Read a character from the serial port. Note that this
@@ -84,10 +84,6 @@ serial_write (int fd, void * buf, size_t len)
  * interpreted as control characters and swallowed.
  */
 
-/* XXX TODO:
-This needs to be able to switch between blocking and non blocking IO.
-Additionally, we need to be able to configure the baud rate.
-*/
 static int
 serial_setup (int fd, speed_t baud)
 {
