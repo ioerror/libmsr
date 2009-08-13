@@ -1,0 +1,155 @@
+This is an attempt to document a specification for the MAKSTripe device.
+
+Attempts to reach MAKInterface for an official specification have not been
+fruitful.
+
+We have reverse engineered the serial command interface to the MAKStripe
+to describe this specification. As a result of our methods, it is likely
+incomplete though have have not observed any commands we have not at least
+partially decoded.
+
+While we do understand how to drive the MAKInterface, we do not always
+understand the meaning of the data returned. The signaling information
+from the read command is an unknown format and the signaling information for
+the write command is also currently an open problem. The specification is
+incomplete in this way and is still a work in progress. Attempts to have an
+official specification from the MAKInterface company have not been fruitful.
+
+As it stands today, we have decoded what we believe is a full set of commands
+as exposed by the non-free software published by the fine people at MAKInterface.
+We discovered these commands and their format by sniffing the USB bus on a
+Gnu/Linux machine. The software we used identifies itself as:
+
+	MAKStripeExplorer 1.20
+
+The binary that we used for analysis is as follows:
+
+	sha1sum makstripe
+	9d5af9b61de1e7a8bb4d132b692ff0db35433a6b  makstripe
+
+The device we used identified itself as the following after a reset:
+
+	MSUSB CI.270209
+
+The command format for the MAKStripe should be familiar with anyone who has
+implemented the MSR-206 specification. It also contains a few inconsistant
+areas that will probably irratate the programmer in question. Furthermore
+the hardware itself appears to be limited to only RAW writes. This makes ISO
+encoded writes more complicated in software but still very much possible.
+Additionally, the hardware itself sometimes has errors that seemingly do not
+result in protocol errors that we would expect to see. This is likely because
+of the rather cheap hardware included in the MAKStripe. The device does not
+appear to have the ability to validate data it has just written without a
+second swipe of the freshly written card.
+
+In all cases it appears that the order of operation for commands is essential
+or a programmer will have corrupted data in the byte stream returned by the
+device. Additionally, it appears that the MAKStripe requires blocking IO.
+Opening the device should be done with O_NONBLOCK. It operates at a fixed baud
+rate of 38400.
+
+The format of this document is similar in style to the MSR-206 programmers
+manual.
+
+The MAKStripe uses bitmasks to specify which tracks on which the programmer
+wishes to operate.
+Track one is: <0x01>
+Track two is: <0x02>
+Track three is: <0x04>
+All tracks are represented as a combined mask of: <0x7>
+
+'Reset device'
+Description:
+ Reset the device and return a firmware version string.
+Send: ?<0x4>
+Response: "MSUSB CI.270209"
+Note:
+ This appears to reset the entire device to a freshly powered state.
+ It also appears to return the version of the firmware for the device.
+
+'Read'
+Description:
+ Populate buffer from card, return the sample count in big endian
+ order and the sample data.
+Send: R<0x7>
+Response: Ready
+<swipe card>
+Response: RD<0x20><0xYY><0x20><data>RD=OK
+Note:
+ 0xYY is the sample count represented as a 16bit big endian ordered number.
+ The <data> stream is currently in an unknown format.
+
+'Populate device buffer from host'
+Description:
+ Populate buffer from host machine and send data to device for writing.
+Send: X<number of sample bytes in big endian order><0x7>
+Response: WB<0x20>
+Secondary send: <data samples>
+Secondary response: WB=OK
+Note:
+ The <data> stream is currently in an unknown format.
+
+'Show device buffer'
+Description:
+Send: S<0x4>
+Response: <data samples>RB=1 OK
+Note:
+ The <data> stream is currently in an unknown format.
+
+'Clone card'
+Description:
+ Clone from the buffer on the device onto a blank card.
+Send: C<0x4>
+Response: CP<0x20>
+<swipe card>
+Secondary response: <0x20>CP=OK
+
+'Populate device buffer from card'
+Description:
+ Populate buffer from card (ie: read, but don't show us the data) into the
+ device.
+Send: W<0x04>
+Response: RA
+<swipe card>
+Response: RA=OK
+
+'Clone buffer onto new card'
+Description:
+ Copy device buffer onto a blank card.
+Send: C<0x7>
+Response: CP<0x20>
+<swipe card>
+Response: CP=OK
+Note:
+ It should be possible to reissue the clone command for each copy desired.
+
+'Format track(s) on card'
+Description:
+ This formats the masked tracks on a given card.
+Send: F<track bitmask><0x20>d
+Response: FM<0x20>
+<swipe card>
+Secondary response: FM=OK
+
+'Erase track(s) on card'
+Description:
+ This is a low flux bit erase command.
+Send: E<track bitmask><0x4>
+Response: Er<0x20>
+<swipe card>
+Secondary response: Er=OK
+
+'Erase track(s) on card'
+Description:
+ This is a high flux bit erase command.
+Send: e<track bitmask><0x4>
+Response: eR<0x20>
+<swipe card>
+Secondary response: eR=OK
+
+The following commands appear to be valid but are unknown:
+
+'Undefined command 00'
+Description: Currently undescribed and unknown
+Send: W<0x4>
+Response: "WB "
