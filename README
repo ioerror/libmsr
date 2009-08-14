@@ -7,3 +7,7 @@ other methods of access.
 
 You'll probably want to take a look at the utils/ directory for sample code
 that uses libmsr properly.
+
+If you wish to use a generic audio device as your reader, you'll want to
+install the libsndfile1-dev library. We're in the process of integrating
+dmsb/dab.
