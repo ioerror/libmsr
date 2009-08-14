@@ -203,5 +203,3 @@ mak_successful_clone(int fd)
 	} while (r != 0);
 	return r;
 }
-
-
