@@ -1,0 +1,22 @@
+A frequent problem that plagues magnetic research is that card reads are not
+consistent across swipes. Furthermore, it is difficult to create independent
+implementations without known good read data. Additionally, magnetic stripe
+data is not uniformly represented as perfectly perpendicular information
+across a horizontal plane.
+
+Using a suitably large magnetic viewer it should be possible to capture a
+high resolution image of the magnetic field of the specimen. The image should
+then be processed into a monochromatic representation of the fields. The
+resulting image should have a point of reference for scale. The magnetic fields
+should now be clearly visible and parsable as a matrix.
+
+The matrix can be easily divided into bits. The height of each track is
+parsable by gaps in the matrix. The width and angle of each bit is possible to
+detect by sampling "random" reads across the height of each track.
+
+With this method of visualizing and processing magnetic stripe data, it should
+be possible eliminate read errors with a single visual sample. Additionally, it
+becomes possible to parse arbitrary angled data with a single sample.
+
+The output of this technique should be a bit stream that can be written back to
+a magnetic substance for reconfirmation with a separate reader.
