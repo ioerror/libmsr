@@ -41,9 +41,9 @@ specific hardware for encoding and decoding. Such hardware is insufficient for
 reading any custom formatted field information. To better understand custom
 formats, it's important to have multiple avenues for inspection.
 
-The two well known methods of sensing a magnetic field are, most commonly,
-    electronic sensing of a magnetic waveform, and secondly, with
-    non-electronic ferro-fluids in the form of a spray or in a plastic dish.
+The two best known methods of sensing a magnetic field are, most commonly,
+electronic sensing of a magnetic waveform, and secondly, with non-electronic
+ferro-fluids in the form of a spray or in a plastic dish.
 
 Electronic sensing of a waveform is stunningly simple in principle. Energy is
 transferred by the movement of a magnetic medium with an arbitrary encoded
