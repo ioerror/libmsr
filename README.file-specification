@@ -1,4 +1,3 @@
-
 The libmsr MagPack specification details important information for data and
 meta-data relating to the capture of magnetic fields.
 
@@ -15,7 +14,7 @@ It is possible to measure the Oersted rating of a given magnetic field with a
 B-H Analyzer. The B-H Analyzer measures residual flux density (Br) and coercive
 force (Hc). In practice such an analyzer is unnecessary excepting specific
 cases with serious forensic requirements. Ferromagnetic material that allows
-for low coercivity state changes are lighter in color. It is common to see
+for low coercivity state changes appear lighter in color. It is common to see
 higher coercivity magnetic material approaching a darker black color.
 
 There are a variable number of magnetic waveforms on a given horizontal plane.
