@@ -1,5 +1,14 @@
-The libmsr MagPack specification details important information for data and
-meta-data relating to the capture of magnetic fields.
+This document introduces the MagPack file format specification. Currently
+there is no open or free standard for encoding the data and relevant metadata of
+magnetic retrieval procedures. MagPack aims to fill that void. MagPacks are
+important for the capture, analysis, and archival of information pertaining
+to magnetic information.
+
+The MagPack file format details important information for data and meta-data
+relating to the capture of magnetic fields. This document outlines the
+abstract physical phenomenon of magnetic stripes, the concrete methods used to
+capture analog or digital data, and finally the format of the data as it is
+stored on a computer system.
 
 Magnetic fields are generally a series of semi-independent waveforms encoded
 perpendicularly across a horizontal plane of ferromagnetic material.
