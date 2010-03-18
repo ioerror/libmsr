@@ -11,6 +11,11 @@ This field strength is measured in Oersted (commonly abbreviated as Oe):
 
 	http://en.wikipedia.org/wiki/Oersted
 
+To measure the coercive force (Hc) of a magnetic field, you may want to acquire
+a rather expensive B-H Analyzer:
+
+	http://www.miko.com.hk/IWATSU/sy8258.utf8.en.htm
+
 If you'd like to do visual inspection of small amounts of magnetic material,
 you may want to invest in a basic Arnold Magnetics viewer:
 
