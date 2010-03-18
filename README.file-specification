@@ -1,5 +1,122 @@
-libmsr needs to have an on disk or in database card format.
-It needs to handle raw data as well as common encoding formats (such as the
-common ISO format).
 
-Suggestions welcome.
+The libmsr MagPack specification details important information for data and
+meta-data relating to the capture of magnetic fields.
+
+Magnetic fields are generally a series of semi-independent waveforms encoded
+perpendicularly across a horizontal plane of ferromagnetic material.
+
+The horizontal plane is often referenced in literature as a stripe, a
+ferromagnetic tape, or as a magnetic section of a card shaped object. The field
+strength of the magnetic waveforms is measured in Oersted units. Generally
+these units are grouped into high and low Oersteds; It is common to see low-co
+or hi-co as representations of low and high Oersted coercivity respectively.
+
+It is possible to measure the Oersted rating of a given magnetic field with a
+B-H Analyzer. The B-H Analyzer measures residual flux density (Br) and coercive
+force (Hc). In practice such an analyzer is unnecessary excepting specific
+cases with serious forensic requirements. Ferromagnetic material that allows
+for low coercivity state changes are lighter in color. It is common to see
+higher coercivity magnetic material approaching a darker black color.
+
+There are a variable number of magnetic waveforms on a given horizontal plane.
+A plane may have one large waveform encoded across the ferromagnetic material
+or many smaller waveforms. Any given waveform may have encoding breaks across
+the horizontal plane. It is uncommon to see such breaks but it is not
+technically impossible, it is merely uncommon.
+
+A magnetic waveform in this context is commonly referred to as a track of data.
+There are magnetic variations in each track. In addition to the coercive force
+of a given waveform, the track's waveform may not be perpendicular to the
+longitude of the magnetic material. It may be written at an arbitrary and
+consistent angle. This may be the result of magnetic write head mis-alignment
+or because of a deliberate alignment that is consistent across an entire
+system. Often angles are used to prevent simple copying techniques, reads from
+cheaper ISO 7811 capable readers, or to prevent accidental demagnetization. The
+physical width of each waveform, the length of the waveform, the height of the
+waveform varies. Each of these elements is a unique characteristic that may be
+used to identify different magnetic writing elements.
+
+Each waveform represents either analog or digitally encoded data. Commonly used
+cards are encoded as specified in ISO 7811. Many magnetic devices have ISO 7811
+specific hardware for encoding and decoding. Such hardware is insufficient for
+reading any custom formatted field information. To better understand custom
+formats, it's important to have multiple avenues for inspection.
+
+The two well known methods of sensing a magnetic field are, most commonly,
+    electronic sensing of a magnetic waveform, and secondly, with
+    non-electronic ferro-fluids in the form of a spray or in a plastic dish.
+
+Electronic sensing of a waveform is stunningly simple in principle. Energy is
+transferred by the movement of a magnetic medium with an arbitrary encoded
+waveform across a magnetic sensing head. The magnetic field is converted into
+electrical energy as a result of kinetic energy. The electronic signals have a
+fluctuation that is directly correlated to the fluctuation of the magnetic
+field. Flux changes are called zones. The series of electronic bursts is an
+analog electrical signal that is commonly amplified and finally interpreted.
+Interpretation of the analog signal relates to the distance between zones and
+the content of the zones. The flux changes generally must be sensed at a
+constant rate. This data is usually processed with an analog to digital signal
+processor in order to understand the electronic bursts in context. It is
+possible to use a sound card or custom circuitry. Electronic reading of
+magnetic fields is of variable quality.
+
+Non-electronic ferro-fluids are even simpler. Ferro-fluids are often a brown or
+blackish color; It is common to see ferro-fluids spray cans and reusable dishes
+filled with ferro-fluids. It is possible to visually see the waveform of the
+field when a ferro-fluid is sprayed, coated or set on a magnetic substance. It
+is often possible to visually see a continuous line with a ferrorfluid viewer
+if the magnetic writing element lacks proper shielding at the top and bottom of
+the waveform. It is possible to process an optical form of the magnetic field
+to confirm an electronic read. High resolution scans with high resolution
+ferro-fluids allow for extremely high quality interpretation of magnetic field
+fluctuations.
+
+To properly capture information about a specific magnetic field, a high
+resolution scan of a fluid coated field and of properly aligned electronic read
+is necessary.
+
+It it proposed that the following data should be captured about a given
+magnetic substance:
+
+    Date and time of sample capture
+    Suspected date and time of sample creation
+    Measured or suspected Hc rating (common cards have common Oersted ratings)
+    Device name, model, or method used for the capture of the specimen
+    Angle of field waveforms relative to the longitude of the substance
+
+Visual field sampling:
+
+    Fluid coating and high resolution (1400 DPI) scan of the coated field
+    The scan must be in PNG or BMP format
+
+ISO 7811 electronic sampling:
+
+    Track numbers
+    Bit width per track
+    Bits per inch per track
+    Likely overall speed of swipe if available
+    The contents should be represented as a byte array for each track
+
+Raw or unformatted electronic bit pattern sampling:
+
+    Angle of write
+    relative to length of track
+    Track numbers Bit width per track
+    Bits per inch per track
+    Likely overall speed of swipe if available
+    The contents should be represented as a byte array for each track
+
+Electronic audio sampling:
+
+    Encoding format (eg: AFMT_S16_LE )
+    Number of channels (eg: mono or stereo)
+    Sample rate (eg: 192000)
+    Total sample time (eg: milliseconds)
+
+It is important to capture as many sample types as is possible. It is possible
+to positively confirm data given a large set of sampling techniques. It makes
+testing and transformation between different devices with different
+capabilities simple.
+
+The format of the data packing is currently unspecified. This draft will be
+updated when I have slept.
