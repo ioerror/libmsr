@@ -1,16 +1,36 @@
 libmsr - libmsr is basically magnetic stripe reading
 
+What is libmsr?
+---------------
 This is a library for various magnetic stripe reading and writing hardware.
 
-Generally, it requires a serial interface. In the future we may support
-other methods of access.
+What kind of hardware can I use?
+--------------------------------
+Generally, libmsr requires a device with a serial interface. In the future we
+may support other methods of access. Currently supported hardware is outlined
+on our wiki:
 
+    http://code.google.com/p/libmsr/wiki/HardwareComparisionChart
+
+Where are sample programs that I can study, improve, and share?
+---------------------------------------------------------------
 You'll probably want to take a look at the utils/ directory for sample code
 that uses libmsr properly.
+
+What kind of experimental hardware is in the future of libmsr?
+--------------------------------------------------------------
+Lots! The MakStripe is a work in progress:
+
+    http://code.google.com/p/libmsr/wiki/MAKStripeSpecification
+
+Additionally, audio readers such as the circuits found in 2600 or in the Square
+device are paritally supported.
 
 If you wish to use a generic audio device as your reader, you'll want to
 install the libsndfile1-dev library. We're in the process of integrating
 dmsb/dab.
 
+Where should I start?
+---------------------
 It is highly suggested to read all of the README files in the package.
 A good start would be the README.magnetic-introduction file.
