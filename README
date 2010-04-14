@@ -11,3 +11,6 @@ that uses libmsr properly.
 If you wish to use a generic audio device as your reader, you'll want to
 install the libsndfile1-dev library. We're in the process of integrating
 dmsb/dab.
+
+It is highly suggested to read all of the README files in the package.
+A good start would be the README.magnetic-introduction file.
