@@ -14,12 +14,82 @@
 #include "libmsr.h"
 
 
+/********** function wrappers **********/
+/* allocate memory with out of memory checking
+   [size]          allocate size bytes
+   returns         pointer to allocated memory */
+void *msr_malloc(size_t size)
+{
+  void *ptr;
+
+  ptr = malloc(size);
+  if (ptr == NULL) {
+    fprintf(stderr, "Out of memory.\n");
+    exit(EXIT_FAILURE);
+  }
+
+  return ptr;
+}
+
+
+/* reallocate memory with out of memory checking
+   [ptr]           memory to reallocate
+   [size]          allocate size bytes
+   returns         pointer to reallocated memory */
+void *msr_realloc(void *ptr, size_t size)
+{
+  void *nptr;
+
+  nptr = realloc(ptr, size);
+  if (nptr == NULL) {
+    fprintf(stderr, "Out of memory.\n");
+    exit(EXIT_FAILURE);
+  }
+
+  return nptr;
+}
+
+
+/* copy a string with out of memory checking
+   [string]         string to copy
+   returns          newly allocated copy of string */
+char *msr_strdup(char *string)
+{
+  char *ptr;
+
+  ptr = msr_malloc(strlen(string) + 1);
+  strcpy(ptr, string);
+
+  return ptr;
+}
+
+
+/* read with error checking
+   [fd]            file descriptor to read from
+   [buf]           buffer
+   [count]         bytes to read
+   returns         bytes read */
+ssize_t msr_read(int fd, void *buf, size_t count)
+{
+  int retval;
+
+  retval = read(fd, buf, count);
+  if (retval == -1) {
+    perror("read()");
+    exit(EXIT_FAILURE);
+  }
+
+  return retval;
+}
+
+/********** end function wrappers **********/
+
+
 /********** string functions **********/
 /* returns a pointer to the reversed string
    [string]        string to reverse
    returns         newly allocated reversed string */
-char
-*msr_reverse_string(char *string)
+char *msr_reverse_string(char *string)
 {
   char *rstring;
   int i, string_len;
@@ -43,8 +113,7 @@ char
 /* parse ABA format raw bits and return a pointer to the decoded string
    [bitstring]     string to decode
    returns         decoded string */
-char
-*msr_parse_ABA(char *bitstring)
+char *msr_parse_ABA(char *bitstring)
 {
   char *decoded_string, *lrc_start, *start_decode, *string;
   char lrc[] = {1, 1, 0, 1, 0}; /* initial condition is LRC of the start
@@ -145,8 +214,7 @@ char
 /* parse IATA format raw bits and return a pointer to the decoded string
    [bitstring]     string to decode
    returns         decoded string */
-char
-*msr_parse_IATA(char *bitstring)
+char *msr_parse_IATA(char *bitstring)
 {
   char *decoded_string, *lrc_start, *start_decode, *string;
   char lrc[] = {1, 0, 1, 0, 0, 0, 1}; /* initial condition is LRC of the start
@@ -250,81 +318,6 @@ char
 /********** end parsing functions **********/
 
 
-/********** function wrappers **********/
-/* allocate memory with out of memory checking
-   [size]          allocate size bytes
-   returns         pointer to allocated memory */
-void
-*msr_malloc(size_t size)
-{
-  void *ptr;
-
-  ptr = malloc(size);
-  if (ptr == NULL) {
-    fprintf(stderr, "Out of memory.\n");
-    exit(EXIT_FAILURE);
-  }
-
-  return ptr;
-}
-
-
-/* reallocate memory with out of memory checking
-   [ptr]           memory to reallocate
-   [size]          allocate size bytes
-   returns         pointer to reallocated memory */
-void
-*msr_realloc(void *ptr, size_t size)
-{
-  void *nptr;
-
-  nptr = realloc(ptr, size);
-  if (nptr == NULL) {
-    fprintf(stderr, "Out of memory.\n");
-    exit(EXIT_FAILURE);
-  }
-
-  return nptr;
-}
-
-
-/* copy a string with out of memory checking
-   [string]         string to copy
-   returns          newly allocated copy of string */
-char
-*msr_strdup(char *string)
-{
-  char *ptr;
-
-  ptr = msr_malloc(strlen(string) + 1);
-  strcpy(ptr, string);
-
-  return ptr;
-}
-
-
-/* read with error checking
-   [fd]            file descriptor to read from
-   [buf]           buffer
-   [count]         bytes to read
-   returns         bytes read */
-ssize_t
-msr_read(int fd, void *buf, size_t count)
-{
-  int retval;
-
-  retval = read(fd, buf, count);
-  if (retval == -1) {
-    perror("read()");
-    esit(EXIT_FAILURE);
-  }
-
-  return retval;
-}
-
-/********** end function wrappers **********/
-
-
 
 
 /********** dsp functions **********/
@@ -333,8 +326,7 @@ msr_read(int fd, void *buf, size_t count)
    [fd]            file descriptor to set ioctls on
    [verbose]       prints verbose messages if true
    returns         sample rate */
-int
-msr_dsp_init(int fd)
+int msr_dsp_init(int fd)
 {
   int ch, fmt, sr;
 
@@ -376,8 +368,7 @@ msr_dsp_init(int fd)
 /* prints the maximum dsp level to aid in setting the silence threshold
    [fd]            file descriptor to read from
    [sample_rate]   sample rate of device */
-void
-msr_print_max_level(int fd, int sample_rate)
+void msr_print_max_level(int fd, int sample_rate)
 {
   int i;
   short int buf, last = 0;
@@ -409,15 +400,14 @@ msr_print_max_level(int fd, int sample_rate)
    ** global **
    [sample]        sample
    [sample_size]   number of frames in sample */
-short int
-msr_evaluate_max(void)
+short int msr_evaluate_max(void)
 {
   int i;
   short int max = 0;
 
-  for (i = 0; i < sample_size; i++) {
-    if (sample[i] > max)
-       max = sample[i];
+  for (i = 0; i < audio_sample_size; i++) {
+    if (audio_sample[i] > max)
+       max = audio_sample[i];
   }
 
   return max;
@@ -427,8 +417,7 @@ msr_evaluate_max(void)
 /* pauses until the dsp level is above the silence threshold
    [fd]            file descriptor to read from
    [silence_thres] silence threshold */
-void
-msr_silence_pause(int fd, int silence_thres)
+void msr_silence_pause(int fd, int silence_thres)
 {
   short int buf = 0;
 
@@ -452,32 +441,31 @@ msr_silence_pause(int fd, int silence_thres)
    ** global **
    [sample]        sample
    [sample_size]   number of frames in sample */
-void
-msr_get_dsp(int fd, int sample_rate, int silence_thres)
+void msr_get_dsp(int fd, int sample_rate, int silence_thres)
 {
   int count = 0, eos = 0, i;
   short buf;
 
-  sample_size = 0;
+  audio_sample_size = 0;
 
   /* wait for sample */
   msr_silence_pause(fd, silence_thres);
 
   while (!eos) {
     /* fill buffer */
-    sample = msr_realloc(sample, sizeof (short int) * (BUF_SIZE * (count + 1)));
+    audio_sample = msr_realloc(audio_sample, sizeof (short int) * (BUF_SIZE * (count + 1)));
     for (i = 0; i < BUF_SIZE; i++) {
       msr_read(fd, &buf, sizeof (short int));
-      sample[i + (count * BUF_SIZE)] = buf;
+      audio_sample[i + (count * BUF_SIZE)] = buf;
     }
     count++;
-    sample_size = count * BUF_SIZE;
+    audio_sample_size = count * BUF_SIZE;
 
     /* check for silence */
     eos = 1;
-    if (sample_size > (sample_rate * END_LENGTH) / 1000) {
+    if (audio_sample_size > (sample_rate * END_LENGTH) / 1000) {
       for (i = 0; i < (sample_rate * END_LENGTH) / 1000; i++)  {
-        buf = sample[(count * BUF_SIZE) - i - 1];
+        buf = audio_sample[(count * BUF_SIZE) - i - 1];
         if (buf < 0)
           buf = -buf;
         if (buf > silence_thres)
@@ -496,8 +484,7 @@ msr_get_dsp(int fd, int sample_rate, int silence_thres)
    [verbose]     verbosity flag
    ** global **
    [sample_size] number of frames in the file */
-SNDFILE
-*msr_sndfile_init(int fd)
+SNDFILE *msr_sndfile_init(int fd)
 {
   SNDFILE *sndfile;
   SF_INFO sfinfo;
@@ -532,7 +519,7 @@ SNDFILE
   }
 
   /* set sample size */
-  sample_size = sfinfo.frames;
+  audio_sample_size = sfinfo.frames;
 
   return sndfile;
 }
@@ -543,20 +530,19 @@ SNDFILE
    ** global **
    [sample]      sample
    [sample_size] number of frames in sample */
-void
-msr_get_sndfile(SNDFILE *sndfile)
+void msr_get_sndfile(SNDFILE *sndfile)
 {
   sf_count_t count;
 
   /* allocate memory for sample */
-  sample = msr_malloc(sizeof(short int) * sample_size);
+  audio_sample = msr_malloc(sizeof(short int) * audio_sample_size);
 
   /* read in sample */
-  count = sf_read_short(sndfile, sample, sample_size);
-  if (count != sample_size) {
+  count = sf_read_short(sndfile, audio_sample, audio_sample_size);
+  if (count != audio_sample_size) {
     fprintf(stderr, "*** Warning: expected %i frames, read %i.\n",
-            sample_size, (int)count);
-    sample_size = count;
+            audio_sample_size, (int)count);
+    audio_sample_size = count;
   }
 }
 
@@ -568,29 +554,28 @@ msr_get_sndfile(SNDFILE *sndfile)
    ** global **
    [sample]        sample
    [sample_size]   number of frames in sample */
-void
-msr_decode_aiken_biphase(int freq_thres, int silence_thres)
+void msr_decode_aiken_biphase(int freq_thres, int silence_thres)
 {
   int i = 0, peak = 0, ppeak = 0;
   int *peaks = NULL, peaks_size = 0;
   int zerobl;
 
   /* absolute value */
-  for (i = 0; i < sample_size; i++)
-    if (sample[i] < 0)
-      sample[i] = -sample[i];
+  for (i = 0; i < audio_sample_size; i++)
+    if (audio_sample[i] < 0)
+      audio_sample[i] = -audio_sample[i];
 
   /* store peak differences */
   i = 0;
-  while (i < sample_size) {
+  while (i < audio_sample_size) {
     /* old peak value */
     ppeak = peak;
     /* find peaks */
-    while (i < sample_size && sample[i] <= silence_thres)
+    while (i < audio_sample_size && audio_sample[i] <= silence_thres)
       i++;
     peak = 0;
-    while (i < sample_size && sample[i] > silence_thres) {
-      if (sample[i] > sample[peak])
+    while (i < audio_sample_size && audio_sample[i] > silence_thres) {
+      if (audio_sample[i] > audio_sample[peak])
         peak = i;
       i++;
     }

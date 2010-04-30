@@ -16,5 +16,5 @@
 
 /* from dmsb.c   */
 
-extern short int *sample = NULL;
-extern int sample_size = 0;
+extern short int *audio_sample = NULL;
+extern int audio_sample_size = 0;
