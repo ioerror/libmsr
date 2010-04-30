@@ -1,4 +1,3 @@
-
 #include <fcntl.h>
 #include <getopt.h>
 #include <sndfile.h>
@@ -16,11 +15,11 @@
 
 
 /********** string functions **********/
-
 /* returns a pointer to the reversed string
    [string]        string to reverse
    returns         newly allocated reversed string */
-char *reverse_string(char *string)
+char
+*msr_reverse_string(char *string)
 {
   char *rstring;
   int i, string_len;
@@ -28,7 +27,7 @@ char *reverse_string(char *string)
   string_len = strlen(string); /* record string length */
 
   /* allocate memory for rstring */
-  rstring = xmalloc(string_len + 1);
+  rstring = msr_malloc(string_len + 1);
 
   for (i = 0; i < string_len; i++) /* reverse string and store in rstring */
     rstring[i] = string[string_len - i - 1];
@@ -37,19 +36,15 @@ char *reverse_string(char *string)
 
   return rstring; /* return rstring */
 }
-
 /********** end string functions **********/
 
 
-
-
-
 /********** parsing functions **********/
-
 /* parse ABA format raw bits and return a pointer to the decoded string
    [bitstring]     string to decode
    returns         decoded string */
-char *parse_ABA(char *bitstring)
+char
+*msr_parse_ABA(char *bitstring)
 {
   char *decoded_string, *lrc_start, *start_decode, *string;
   char lrc[] = {1, 1, 0, 1, 0}; /* initial condition is LRC of the start
@@ -57,7 +52,7 @@ char *parse_ABA(char *bitstring)
   int asciichr, charcnt = 0, i, j;
 
   /* make a copy of bitstring and store it in string */
-  string = xstrdup(bitstring);
+  string = msr_strdup(bitstring);
 
   /* look for start sentinel */
   if ((start_decode = strstr(string, "11010")) == NULL) {
@@ -88,7 +83,7 @@ char *parse_ABA(char *bitstring)
     lrc_start[5] = '\0';
 
   /* allocate memory for decoded_string */
-  decoded_string = xmalloc((strlen(start_decode) / 5) + 3);
+  decoded_string = msr_malloc((strlen(start_decode) / 5) + 3);
 
   decoded_string[charcnt++] = ';'; /* add start sentinel */
 
@@ -150,7 +145,8 @@ char *parse_ABA(char *bitstring)
 /* parse IATA format raw bits and return a pointer to the decoded string
    [bitstring]     string to decode
    returns         decoded string */
-char *parse_IATA(char *bitstring)
+char
+*msr_parse_IATA(char *bitstring)
 {
   char *decoded_string, *lrc_start, *start_decode, *string;
   char lrc[] = {1, 0, 1, 0, 0, 0, 1}; /* initial condition is LRC of the start
@@ -158,7 +154,7 @@ char *parse_IATA(char *bitstring)
   int asciichr, charcnt = 0, i, j;
 
   /* make a copy of bitstring and store it in string */
-  string = xstrdup(bitstring);
+  string = msr_strdup(bitstring);
 
   /* look for start sentinel */
   if ((start_decode = strstr(string, "1010001")) == NULL) {
@@ -190,7 +186,7 @@ char *parse_IATA(char *bitstring)
     lrc_start[7] = '\0';
 
   /* allocate memory for decoded_string */
-  decoded_string = xmalloc((strlen(start_decode) / 7) + 3);
+  decoded_string = msr_malloc((strlen(start_decode) / 7) + 3);
 
   decoded_string[charcnt++] = '%'; /* add start sentinel */
 
@@ -251,18 +247,15 @@ char *parse_IATA(char *bitstring)
   return decoded_string;
 
 }
-
 /********** end parsing functions **********/
 
 
-
-
 /********** function wrappers **********/
-
 /* allocate memory with out of memory checking
    [size]          allocate size bytes
    returns         pointer to allocated memory */
-void *xmalloc(size_t size)
+void
+*msr_malloc(size_t size)
 {
   void *ptr;
 
@@ -276,12 +269,12 @@ void *xmalloc(size_t size)
 }
 
 
-
 /* reallocate memory with out of memory checking
    [ptr]           memory to reallocate
    [size]          allocate size bytes
    returns         pointer to reallocated memory */
-void *xrealloc(void *ptr, size_t size)
+void
+*msr_realloc(void *ptr, size_t size)
 {
   void *nptr;
 
@@ -298,11 +291,12 @@ void *xrealloc(void *ptr, size_t size)
 /* copy a string with out of memory checking
    [string]         string to copy
    returns          newly allocated copy of string */
-char *xstrdup(char *string)
+char
+*msr_strdup(char *string)
 {
   char *ptr;
 
-  ptr = xmalloc(strlen(string) + 1);
+  ptr = msr_malloc(strlen(string) + 1);
   strcpy(ptr, string);
 
   return ptr;
@@ -314,14 +308,15 @@ char *xstrdup(char *string)
    [buf]           buffer
    [count]         bytes to read
    returns         bytes read */
-ssize_t xread(int fd, void *buf, size_t count)
+ssize_t
+msr_read(int fd, void *buf, size_t count)
 {
   int retval;
 
   retval = read(fd, buf, count);
   if (retval == -1) {
     perror("read()");
-    exit(EXIT_FAILURE);
+    esit(EXIT_FAILURE);
   }
 
   return retval;
@@ -338,16 +333,12 @@ ssize_t xread(int fd, void *buf, size_t count)
    [fd]            file descriptor to set ioctls on
    [verbose]       prints verbose messages if true
    returns         sample rate */
-int dsp_init(int fd, int verbose)
+int
+msr_dsp_init(int fd)
 {
   int ch, fmt, sr;
 
-  if (verbose)
-    fprintf(stderr, "*** Setting audio device parameters:\n");
-
   /* set audio format */
-  if (verbose)
-    fprintf(stderr, "    Format: AFMT_S16_LE\n");
   fmt = AFMT_S16_LE;
   if (ioctl(fd, SNDCTL_DSP_SETFMT, &fmt) == -1) {
     perror("SNDCTL_DSP_SETFMT");
@@ -359,8 +350,6 @@ int dsp_init(int fd, int verbose)
   }
 
   /* set audio channels */
-  if (verbose)
-    fprintf(stderr, "    Channels: 1\n");
   ch = 0;
   if (ioctl(fd, SNDCTL_DSP_STEREO, &ch) == -1) {
     perror("SNDCTL_DSP_STEREO");
@@ -372,8 +361,6 @@ int dsp_init(int fd, int verbose)
   }
 
   /* set sample rate */
-  if (verbose)
-    fprintf(stderr, "    Sample rate: %d\n", SAMPLE_RATE);
   sr = SAMPLE_RATE;
   if (ioctl(fd, SNDCTL_DSP_SPEED, &sr) == -1) {
     perror("SNDCTL_DSP_SPEED");
@@ -389,7 +376,8 @@ int dsp_init(int fd, int verbose)
 /* prints the maximum dsp level to aid in setting the silence threshold
    [fd]            file descriptor to read from
    [sample_rate]   sample rate of device */
-void print_max_level(int fd, int sample_rate)
+void
+msr_print_max_level(int fd, int sample_rate)
 {
   int i;
   short int buf, last = 0;
@@ -399,7 +387,7 @@ void print_max_level(int fd, int sample_rate)
   for (i = 0; i < sample_rate * MAX_TERM; i++) {
 
     /* read from fd */
-    xread(fd, &buf, sizeof (short int));
+    msr_read(fd, &buf, sizeof (short int));
 
     /* take absolute value */
     if (buf < 0)
@@ -421,7 +409,8 @@ void print_max_level(int fd, int sample_rate)
    ** global **
    [sample]        sample
    [sample_size]   number of frames in sample */
-short int evaluate_max(void)
+short int
+msr_evaluate_max(void)
 {
   int i;
   short int max = 0;
@@ -438,7 +427,8 @@ short int evaluate_max(void)
 /* pauses until the dsp level is above the silence threshold
    [fd]            file descriptor to read from
    [silence_thres] silence threshold */
-void silence_pause(int fd, int silence_thres)
+void
+msr_silence_pause(int fd, int silence_thres)
 {
   short int buf = 0;
 
@@ -446,7 +436,7 @@ void silence_pause(int fd, int silence_thres)
   while (buf < silence_thres) {
 
     /* read from fd */
-    xread(fd, &buf, sizeof (short int));
+    msr_read(fd, &buf, sizeof (short int));
 
     /* absolute value */
     if (buf < 0)
@@ -462,7 +452,8 @@ void silence_pause(int fd, int silence_thres)
    ** global **
    [sample]        sample
    [sample_size]   number of frames in sample */
-void get_dsp(int fd, int sample_rate, int silence_thres)
+void
+msr_get_dsp(int fd, int sample_rate, int silence_thres)
 {
   int count = 0, eos = 0, i;
   short buf;
@@ -470,13 +461,13 @@ void get_dsp(int fd, int sample_rate, int silence_thres)
   sample_size = 0;
 
   /* wait for sample */
-  silence_pause(fd, silence_thres);
+  msr_silence_pause(fd, silence_thres);
 
   while (!eos) {
     /* fill buffer */
-    sample = xrealloc(sample, sizeof (short int) * (BUF_SIZE * (count + 1)));
+    sample = msr_realloc(sample, sizeof (short int) * (BUF_SIZE * (count + 1)));
     for (i = 0; i < BUF_SIZE; i++) {
-      xread(fd, &buf, sizeof (short int));
+      msr_read(fd, &buf, sizeof (short int));
       sample[i + (count * BUF_SIZE)] = buf;
     }
     count++;
@@ -496,21 +487,17 @@ void get_dsp(int fd, int sample_rate, int silence_thres)
       eos = 0;
   }
 }
-
 /********** end dsp functions **********/
 
 
-
-
-
 /********** begin sndfile functions **********/
-
 /* open the file
    [fd]          file to open
    [verbose]     verbosity flag
    ** global **
    [sample_size] number of frames in the file */
-SNDFILE *sndfile_init(int fd, int verbose)
+SNDFILE
+*msr_sndfile_init(int fd)
 {
   SNDFILE *sndfile;
   SF_INFO sfinfo;
@@ -525,8 +512,8 @@ SNDFILE *sndfile_init(int fd, int verbose)
     exit(EXIT_FAILURE);
   }
 
-  /* print some statistics */
-  if (verbose) {
+  /* this was if(verbose) but might be useful...*/
+  /* print some statistics
     fprintf(stderr, "*** Input file format:\n"
             "    Frames: %i\n"
             "    Sample Rate: %i\n"
@@ -537,7 +524,7 @@ SNDFILE *sndfile_init(int fd, int verbose)
             (int)sfinfo.frames, sfinfo.samplerate, sfinfo.channels,
             sfinfo.format, sfinfo.sections, sfinfo.seekable);
   }
-
+  */
   /* ensure that the file is monaural */
   if (sfinfo.channels != 1) {
     fprintf(stderr, "*** Error: Only monaural files are supported\n");
@@ -556,12 +543,13 @@ SNDFILE *sndfile_init(int fd, int verbose)
    ** global **
    [sample]      sample
    [sample_size] number of frames in sample */
-void get_sndfile(SNDFILE *sndfile)
+void
+msr_get_sndfile(SNDFILE *sndfile)
 {
   sf_count_t count;
 
   /* allocate memory for sample */
-  sample = xmalloc(sizeof(short int) * sample_size);
+  sample = msr_malloc(sizeof(short int) * sample_size);
 
   /* read in sample */
   count = sf_read_short(sndfile, sample, sample_size);
@@ -575,15 +563,13 @@ void get_sndfile(SNDFILE *sndfile)
 /********** end sndfile functions **********/
 
 
-
-
-
 /* decodes aiken biphase and prints binary
    [freq_thres]    frequency threshold
    ** global **
    [sample]        sample
    [sample_size]   number of frames in sample */
-void decode_aiken_biphase(int freq_thres, int silence_thres)
+void
+msr_decode_aiken_biphase(int freq_thres, int silence_thres)
 {
   int i = 0, peak = 0, ppeak = 0;
   int *peaks = NULL, peaks_size = 0;
@@ -609,7 +595,7 @@ void decode_aiken_biphase(int freq_thres, int silence_thres)
       i++;
     }
     if (peak - ppeak > 0) {
-      peaks = xrealloc(peaks, sizeof(int) * (peaks_size + 1));
+      peaks = msr_realloc(peaks, sizeof(int) * (peaks_size + 1));
       peaks[peaks_size] = peak - ppeak;
       peaks_size++;
     }

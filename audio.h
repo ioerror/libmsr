@@ -1,10 +1,8 @@
 /*from dab.c   */
 
-/*** defaults ***/
 #define DEVICE        "/dev/dsp" /* default sound card device */
 #define SAMPLE_RATE   192000     /* default sample rate (hz) */
 #define SILENCE_THRES 5000       /* initial silence threshold */
-/*** end defaults ***/
 
 /* #define DISABLE_VC */
 
@@ -12,8 +10,7 @@
 #define BUF_SIZE      1024  /* buffer size */
 #define END_LENGTH    200   /* msec of silence to determine end of sample */
 #define FREQ_THRES    60    /* frequency threshold (pct) */
-#define MAX_TERM      60    /* sec before termination of print_max_level() */
-#define VERSION       "0.7" /* version */
+#define MAX_TERM      60    /* sec before termination of msr_print_max_level() */
 
 
 
